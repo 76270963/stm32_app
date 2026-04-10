@@ -254,6 +254,53 @@ static void handle_write_params(ReplyBuilder *rb, const uint8_t *req_buf, uint8_
     }
 }
 
+
+
+//读OTA
+static void handle_read_ota(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+	uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+	uint32_t addr = OTA_START_ADDR + block_idx * 1024;
+	uint8_t data[1024];
+	w25q128_read_data(addr, data, 1024);
+
+	reply_add_byte(rb, req_buf[10]);
+	reply_add_byte(rb, req_buf[11]);
+	for (int i = 0; i < 1024; i++)
+	{
+		reply_add_byte(rb, data[i]);
+	}
+	rb->data_len = 1026;
+	reply_send(rb, socket);
+}
+
+//写OTA
+static void handle_write_ota(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+	uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+	const uint8_t *data = req_buf + 12;
+	uint32_t addr = OTA_START_ADDR + block_idx * 1024;
+	writeW25q128(addr, data, 1024);
+
+	reply_add_byte(rb, req_buf[10]);
+	reply_add_byte(rb, req_buf[11]);
+	rb->data_len = 2;
+	reply_send(rb, socket);
+}
+
+
+//OTA升级重启
+static void handle_system_Reset(ReplyBuilder *rb, uint8_t socket)
+{
+	rb->data_len = 0;
+	reply_send(rb, socket);
+	uint8_t OTASIGN[2] = {0xAA,0xAA};
+	writeW25q128(OTA_SIGN_ADDR, OTASIGN, 2);
+	HAL_Delay(20);
+	NVIC_SystemReset();
+}
+
+
 // 读取门参数
 static void handle_read_door(ReplyBuilder *rb, uint8_t socket)
 {
@@ -499,9 +546,9 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 					break;
 
 				case 0x04:
-					if(CMD2 == 0x03) handle_read_ota(&rb, socket);
+					if(CMD2 == 0x03) handle_read_ota(&rb, buf, socket);
 					else if(CMD2 == 0x04) handle_write_ota(&rb, buf, socket);
-					else if(CMD2 == 0x05) handle
+					else if(CMD2 == 0x05) handle_system_Reset(&rb, socket);
 					break;
 
 				case 0x09:
