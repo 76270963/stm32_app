@@ -27,6 +27,14 @@ static uint8_t udp_ready = 0;
 // 链路状态跟踪
 static uint8_t phy_link_last = 0xFF;  // 初始未知
 
+
+
+uint8_t is_tcp_connected(void)
+{
+    return (tcp_state == TCP_STATE_ESTABLISHED);
+}
+
+
 // 重新初始化所有网络服务
 static void network_reinit(void)
 {
@@ -121,6 +129,7 @@ static void process_tcp_server(void)
                 printf("TCP client connected\n");
                 last_heartbeat_time = 0;
                 setSn_IR(TCP_SOCKET, Sn_IR_CON);
+                report_event(EVENT_NET_RECOVER, 0xFF, 0xFFFFFFFF, 0xFFFF);
             }
             else if (sock_state == SOCK_CLOSED)
             {

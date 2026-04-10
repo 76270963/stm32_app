@@ -18,6 +18,7 @@
 
 extern void network_init(void);
 extern void network_process(void);
+extern uint8_t is_tcp_connected(void);
 
 
 #endif /* ETHERNET_NET_SERVICES_H_ */

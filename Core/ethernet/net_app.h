@@ -20,10 +20,11 @@ typedef struct {
 } ReplyBuilder;
 
 
-extern uint8_t crc(const uint8_t *buf, uint16_t lenth);
-extern void pack_device_info(uint8_t *buf);
-extern void parse_tcp_data(uint8_t *buf, uint8_t socket);
-extern uint8_t pack_heartbeat_data(void);
 
+uint8_t crc(const uint8_t *buf, uint16_t lenth);
+void pack_device_info(uint8_t *buf);
+void parse_tcp_data(uint8_t *buf, uint8_t socket);
+uint8_t pack_heartbeat_data(void);
+void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint16_t uid);
 
 #endif /* ETHERNET_NET_APP_H_ */

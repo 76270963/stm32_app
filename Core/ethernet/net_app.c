@@ -73,7 +73,7 @@ void pack_device_info(uint8_t *buf)
 
     // 第一组UID和设备类型
     memcpy(&buf[1], uid, 4);
-    buf[5] = 0x02;  //0x01-单门/0x02-双门/0x04-四门
+    buf[5] = DOOR_TYPE;
 
     // 固定数据段
     buf[6]  = 0x37;
@@ -84,7 +84,7 @@ void pack_device_info(uint8_t *buf)
 
     // 第二组UID和设备类型
     memcpy(&buf[11], uid, 4);
-    buf[15] = buf[5];
+    buf[15] = DOOR_TYPE;
 
     // 硬件和软件版本
     memcpy(&buf[16], HWVER, 4);
@@ -653,3 +653,66 @@ uint8_t pack_heartbeat_data(void)
 	return 1; // 表示成功
 }
 
+
+
+void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint16_t uid)
+{
+	if (!is_tcp_connected()) return;
+
+    uint8_t buf[40];
+    uint8_t idx = 0;
+
+    buf[idx++] = 0x53;
+    uint8_t dev_uid[4];
+    read_stm32_uid(dev_uid);
+    memcpy(&buf[idx], dev_uid, 4);
+    idx += 4;
+
+    buf[idx++] = DOOR_TYPE;
+
+    uint16_t data_len = 0x0F;
+    buf[idx++] = data_len & 0xFF;
+    buf[idx++] = (data_len >> 8) & 0xFF;
+
+    // CMD1 CMD2
+    buf[idx++] = 0x13;
+    buf[idx++] = 0x00;
+
+    // 获取当前时间
+    DateTime dt;
+    PCF8563_GetDateTime(&dt);
+    // 时间数据：年月日时分秒星期（每个1字节）
+    buf[idx++] = dt.year;
+    buf[idx++] = dt.month;
+    buf[idx++] = dt.day;
+    buf[idx++] = dt.hour;
+    buf[idx++] = dt.minute;
+    buf[idx++] = dt.second;
+    buf[idx++] = dt.weekday;
+
+    // 事件类型
+    buf[idx++] = event_type;
+    // 点位
+    buf[idx++] = point;
+    // 卡号（4字节，小端）
+    buf[idx++] = card_number & 0xFF;
+    buf[idx++] = (card_number >> 8) & 0xFF;
+    buf[idx++] = (card_number >> 16) & 0xFF;
+    buf[idx++] = (card_number >> 24) & 0xFF;
+    // UID（2字节，小端）
+    buf[idx++] = uid & 0xFF;
+    buf[idx++] = (uid >> 8) & 0xFF;
+
+    uint16_t total_len = idx;
+    xor_encrypt(buf, total_len);
+    uint8_t crc_val = crc(buf, total_len);
+	buf[total_len] = crc_val;
+
+    // 发送
+    if (send(TCP_SOCKET, buf, total_len + 1) <= 0) {
+        printf("Event report send failed\n");
+    } else {
+    	printf("Event: %d (Card %08X, Point %d)\r\n", event_type, (unsigned int)card_number, point);
+    }
+
+}

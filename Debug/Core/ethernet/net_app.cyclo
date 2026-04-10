@@ -31,3 +31,4 @@
 ../Core/ethernet/net_app.c:518:6:read_event_log_total_num	1
 ../Core/ethernet/net_app.c:532:6:parse_tcp_data	35
 ../Core/ethernet/net_app.c:618:9:pack_heartbeat_data	1
+../Core/ethernet/net_app.c:658:6:report_event	3

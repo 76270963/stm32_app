@@ -13,4 +13,4 @@
 ../Core/user/access.c:334:6:WiegandAccess_Init	8	static
 ../Core/user/access.c:344:6:WiegandAccess_ProcessCard	96	static
 ../Core/user/access.c:424:6:WiegandAccess_ProcessKey	128	static
-../Core/user/access.c:850:6:WiegandAccess_TimerTick	72	static
+../Core/user/access.c:831:6:WiegandAccess_TimerTick	72	static

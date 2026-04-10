@@ -1,7 +1,8 @@
-../Core/ethernet/net_services.c:31:13:network_reinit	8	static
-../Core/ethernet/net_services.c:71:13:check_phy_link	16	static
-../Core/ethernet/net_services.c:91:16:tcp_recv_direct	32	static
-../Core/ethernet/net_services.c:108:13:process_tcp_server	32	static
-../Core/ethernet/net_services.c:233:13:process_udp_server	152	static
-../Core/ethernet/net_services.c:260:6:network_init	16	static
-../Core/ethernet/net_services.c:274:6:network_process	8	static
+../Core/ethernet/net_services.c:32:9:is_tcp_connected	8	static
+../Core/ethernet/net_services.c:39:13:network_reinit	8	static
+../Core/ethernet/net_services.c:79:13:check_phy_link	16	static
+../Core/ethernet/net_services.c:99:16:tcp_recv_direct	32	static
+../Core/ethernet/net_services.c:116:13:process_tcp_server	32	static
+../Core/ethernet/net_services.c:242:13:process_udp_server	152	static
+../Core/ethernet/net_services.c:269:6:network_init	16	static
+../Core/ethernet/net_services.c:283:6:network_process	8	static

@@ -12,5 +12,5 @@
 ../Core/user/access.c:262:13:ProcessValidCard	12
 ../Core/user/access.c:334:6:WiegandAccess_Init	1
 ../Core/user/access.c:344:6:WiegandAccess_ProcessCard	23
-../Core/user/access.c:424:6:WiegandAccess_ProcessKey	53
-../Core/user/access.c:850:6:WiegandAccess_TimerTick	14
+../Core/user/access.c:424:6:WiegandAccess_ProcessKey	47
+../Core/user/access.c:831:6:WiegandAccess_TimerTick	14

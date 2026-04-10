@@ -50,8 +50,10 @@
 //******************************************************
 
 
-#define HWVER   "1.01"   //硬件版本号
-#define SWVER   "1.02"    //软件版本号
+#define HWVER          "1.01"   //硬件版本号
+#define SWVER          "1.02"    //软件版本号
+#define DOOR_TYPE       0x02     //控制器类型 0x01-单门/0x02-双门/0x04-四门
+
 
 #define DOOR_TOTAL_NUM       4      // 总门数量
 #define DOOR_DIR_NUM         2      // 每个门的方向数（0=入口，1=出口）
