@@ -9,6 +9,8 @@
 #include "wizchip_conf.h"
 #include "socket.h"
 
+uint16_t BlockCount;
+
 //用于标记网络参数是否被修改
 volatile uint8_t network_params_changed = 0;
 
@@ -71,7 +73,7 @@ void pack_device_info(uint8_t *buf)
 
     // 第一组UID和设备类型
     memcpy(&buf[1], uid, 4);
-    buf[5] = 0x04; //ReadType();
+    buf[5] = 0x02;  //0x01-单门/0x02-双门/0x04-四门
 
     // 固定数据段
     buf[6]  = 0x37;
@@ -278,6 +280,8 @@ static void handle_read_ota(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t so
 static void handle_write_ota(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
 {
 	uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+	BlockCount = block_idx;//取OTA块
+
 	const uint8_t *data = req_buf + 12;
 	uint32_t addr = OTA_START_ADDR + block_idx * 1024;
 	writeW25q128(addr, data, 1024);
@@ -294,9 +298,12 @@ static void handle_system_Reset(ReplyBuilder *rb, uint8_t socket)
 {
 	rb->data_len = 0;
 	reply_send(rb, socket);
-	uint8_t OTASIGN[2] = {0xAA,0xAA};
-	writeW25q128(OTA_SIGN_ADDR, OTASIGN, 2);
-	HAL_Delay(20);
+	uint8_t OTASIGN[4] = {0};
+	OTASIGN[0] = 0xAA;
+	OTASIGN[1] = 0xAA;
+	OTASIGN[2] = BlockCount >> 8;
+	OTASIGN[3] = BlockCount;
+	writeW25q128(OTA_SIGN_ADDR, OTASIGN, 4);
 	NVIC_SystemReset();
 }
 
