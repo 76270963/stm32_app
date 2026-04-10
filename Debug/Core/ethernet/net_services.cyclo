@@ -1,0 +1,7 @@
+../Core/ethernet/net_services.c:31:13:network_reinit	4
+../Core/ethernet/net_services.c:71:13:check_phy_link	3
+../Core/ethernet/net_services.c:91:16:tcp_recv_direct	5
+../Core/ethernet/net_services.c:108:13:process_tcp_server	23
+../Core/ethernet/net_services.c:233:13:process_udp_server	6
+../Core/ethernet/net_services.c:260:6:network_init	2
+../Core/ethernet/net_services.c:274:6:network_process	1

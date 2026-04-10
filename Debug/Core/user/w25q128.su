@@ -1,0 +1,10 @@
+../Core/user/w25q128.c:12:9:w25q128_spi_swap_byte	40	static
+../Core/user/w25q128.c:21:10:w25q128_read_id	16	static
+../Core/user/w25q128.c:38:6:w25q128_writ_enable	8	static
+../Core/user/w25q128.c:46:9:w25q128_read_sr1	24	static
+../Core/user/w25q128.c:60:6:w25q128_wait_busy	8	static
+../Core/user/w25q128.c:65:6:w25q128_send_address	16	static
+../Core/user/w25q128.c:72:6:w25q128_read_data	40	static
+../Core/user/w25q128.c:87:6:w25q128_write_page	40	static
+../Core/user/w25q128.c:106:6:w25q128_erase_sector	16	static
+../Core/user/w25q128.c:119:6:writeW25q128	4168	static

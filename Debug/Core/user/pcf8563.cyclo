@@ -1,0 +1,5 @@
+../Core/user/pcf8563.c:15:6:PCF8563_Init	1
+../Core/user/pcf8563.c:36:9:BCD2DEC	1
+../Core/user/pcf8563.c:46:9:DEC2BCD	1
+../Core/user/pcf8563.c:51:6:PCF8563_GetDateTime	1
+../Core/user/pcf8563.c:71:6:PCF8563_SetDateTime	1

@@ -1,0 +1,10 @@
+../Core/ethernet/w5500_hal.c:12:13:my_cris_enter	1
+../Core/ethernet/w5500_hal.c:17:13:my_cris_exit	1
+../Core/ethernet/w5500_hal.c:23:13:my_cs_select	1
+../Core/ethernet/w5500_hal.c:28:13:my_cs_deselect	1
+../Core/ethernet/w5500_hal.c:34:16:my_spi_readbyte	1
+../Core/ethernet/w5500_hal.c:41:13:my_spi_writebyte	1
+../Core/ethernet/w5500_hal.c:46:13:my_spi_readburst	1
+../Core/ethernet/w5500_hal.c:51:13:my_spi_writeburst	1
+../Core/ethernet/w5500_hal.c:58:6:print_network_information	2
+../Core/ethernet/w5500_hal.c:83:6:W5500_Init_HAL	1

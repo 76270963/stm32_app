@@ -1,0 +1,5 @@
+../Core/user/user.c:17:6:read_stm32_uid	56	static
+../Core/user/user.c:59:7:GrtVoltage	16	static
+../Core/user/user.c:76:6:SysPara_init	40	static
+../Core/user/user.c:113:6:SysDoor_init	24	static
+../Core/user/user.c:131:6:read_system_parameters	8	static

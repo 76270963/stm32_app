@@ -1,0 +1,6 @@
+../Core/user/usart.c:22:1:__io_putchar	1
+../Core/user/usart.c:71:10:GetCrc_16	2
+../Core/user/usart.c:84:6:usartSend	2
+../Core/user/usart.c:92:6:USART_IRQHandler_myself	3
+../Core/user/usart.c:108:6:usartRead	1
+../Core/user/usart.c:122:6:HAL_UART_ErrorCallback	5

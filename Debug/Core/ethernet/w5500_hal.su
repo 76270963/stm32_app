@@ -1,0 +1,10 @@
+../Core/ethernet/w5500_hal.c:12:13:my_cris_enter	8	static,ignoring_inline_asm
+../Core/ethernet/w5500_hal.c:17:13:my_cris_exit	8	static,ignoring_inline_asm
+../Core/ethernet/w5500_hal.c:23:13:my_cs_select	8	static
+../Core/ethernet/w5500_hal.c:28:13:my_cs_deselect	8	static
+../Core/ethernet/w5500_hal.c:34:16:my_spi_readbyte	16	static
+../Core/ethernet/w5500_hal.c:41:13:my_spi_writebyte	16	static
+../Core/ethernet/w5500_hal.c:46:13:my_spi_readburst	24	static
+../Core/ethernet/w5500_hal.c:51:13:my_spi_writeburst	24	static
+../Core/ethernet/w5500_hal.c:58:6:print_network_information	64	static
+../Core/ethernet/w5500_hal.c:83:6:W5500_Init_HAL	56	static
