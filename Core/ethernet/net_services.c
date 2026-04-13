@@ -129,7 +129,7 @@ static void process_tcp_server(void)
                 printf("TCP client connected\n");
                 last_heartbeat_time = 0;
                 setSn_IR(TCP_SOCKET, Sn_IR_CON);
-                report_event(EVENT_NET_RECOVER, 0xFF, 0xFFFFFFFF, 0xFFFF);
+                report_event(EVENT_NET_RECOVER, 0xFF, 0xFFFFFFFF, 0xFFFF);  //上报
             }
             else if (sock_state == SOCK_CLOSED)
             {

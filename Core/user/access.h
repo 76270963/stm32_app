@@ -153,7 +153,7 @@
 
 
 // ==================== 超时时间宏定义 ====================
-#define PWD_WAIT_TIMEOUT_MS     30000   // 密码等待超时（30秒）
+#define PWD_WAIT_TIMEOUT_MS     15000   // 密码等待超时（30秒）
 #define MULTI_CARD_TIMEOUT_MS   15000   // 多卡组合超时（15秒）
 
 

@@ -654,10 +654,9 @@ uint8_t pack_heartbeat_data(void)
 }
 
 
-
+//事件类型1 + 点位1 + 卡号4 + UID2
 void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint16_t uid)
 {
-	if (!is_tcp_connected()) return;
 
     uint8_t buf[40];
     uint8_t idx = 0;
@@ -708,7 +707,9 @@ void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint1
     uint8_t crc_val = crc(buf, total_len);
 	buf[total_len] = crc_val;
 
+
     // 发送
+	if (!is_tcp_connected()) return;
     if (send(TCP_SOCKET, buf, total_len + 1) <= 0) {
         printf("Event report send failed\n");
     } else {

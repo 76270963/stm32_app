@@ -50,17 +50,13 @@ typedef struct {
 } KeyCollectState;
 
 
-// ==================== 全局变量 ====================
 static MultiCardState g_multi_state[4][2];
 static PasswordWaitState g_pwd_state[4][2];
 static KeyCollectState g_key_state[4][2];
 static bool g_first_card_flag[4][2];
 static uint16_t g_last_date = 0;
 
-// ==================== 外部函数声明 ====================
-extern void PCF8563_GetDateTime(DateTime *dt);
 
-// ==================== 辅助函数 ====================
 static void GetCurrentDateTime(uint16_t *year, uint8_t *month, uint8_t *day,
                                uint8_t *hour, uint8_t *minute, uint8_t *second, uint8_t *weekday)
 {
@@ -75,8 +71,7 @@ static void GetCurrentDateTime(uint16_t *year, uint8_t *month, uint8_t *day,
     *weekday = dt.weekday;
 }
 
-
-// 根据卡号查找用户（线性搜索用户表）
+//搜索卡
 static uint32_t FindUserByCard(uint32_t card_number, uint8_t *user_buf)
 {
     uint8_t buf[26];
@@ -85,23 +80,20 @@ static uint32_t FindUserByCard(uint32_t card_number, uint8_t *user_buf)
         w25q128_read_data(addr, buf, 26);
         uint32_t stored_card = *(uint32_t*)(buf + 2);
 
-        // 如果卡号为 0xFFFFFFFF，表示该用户为空，且后续用户也为空（连续存储）
         if (stored_card == 0xFFFFFFFF) {
-            break;   // 直接退出，无需继续搜索
+            break;
         }
 
         if (stored_card == card_number) {
             memcpy(user_buf, buf, 26);
-            printf("Password bytes: %02X %02X %02X %02X\n", user_buf[6], user_buf[7], user_buf[8], user_buf[9]);
+            //printf("Password bytes: %02X %02X %02X %02X\n", user_buf[6], user_buf[7], user_buf[8], user_buf[9]);
             return uid;
         }
     }
     return 0;
 }
 
-
-
-// 假日编程检查（组号1~15）
+//假日权限检查
 static uint8_t CheckHolidaySchedule(uint8_t group_id, uint16_t year, uint8_t month, uint8_t day,
                                     uint8_t hour, uint8_t minute)
 {
@@ -181,10 +173,11 @@ static bool CheckTimePermission(uint8_t weekly_id, uint8_t holiday_id, uint8_t d
 // 输出开门信号（打印事件，实际需替换为硬件操作）
 static void DoUnlock(uint8_t reader_id, uint8_t door_idx, DoorDir dir, uint8_t card_count, bool is_password)
 {
-    uint8_t event = EVENT_SINGLE_UNLOCK + (card_count - 1);
-    if (is_password) event = EVENT_PWD_UNLOCK;
-    printf("Event: %d (Reader%d, Door%d %s)\r\n", event, reader_id, door_idx+1, dir==DOOR_ENTRY?"IN":"OUT");
+    //uint8_t event = EVENT_SINGLE_UNLOCK + (card_count - 1);
+   // if (is_password) event = EVENT_PWD_UNLOCK;
+    //printf("Event: %d (Reader%d, Door%d %s)\r\n", event, reader_id, door_idx+1, dir==DOOR_ENTRY?"IN":"OUT");
     // 实际硬件开门代码
+	;
 }
 
 // 清除多卡状态
@@ -208,7 +201,7 @@ static void ClearKeyCollector(uint8_t door_idx, DoorDir dir)
     memset(g_key_state[door_idx][dir].pwd_buf, 0, sizeof(g_key_state[door_idx][dir].pwd_buf));
 }
 
-
+//密码比对操作
 static uint32_t EncodePassword(const char *pwd_str)
 {
     int len = strlen(pwd_str);
@@ -222,7 +215,6 @@ static uint32_t EncodePassword(const char *pwd_str)
     }
 
     if (len < 8) {
-        // 高位填充FF：将hex_val放置在低4*len位，高4*(8-len)位全1
         uint32_t result = (0xFFFFFFFF << (4 * len)) | hex_val;
         return result;
     } else {
@@ -231,51 +223,56 @@ static uint32_t EncodePassword(const char *pwd_str)
 }
 
 
-// 验证密码（输入字符串与存储的4字节整数比较）
+// 验证密码
 static bool VerifyPassword(uint32_t stored_pwd, const char *input_pwd_str)
 {
 	uint32_t encoded = EncodePassword(input_pwd_str);
 	return (stored_pwd == encoded);
 }
 
-// 将卡加入多卡组合（密码验证成功后调用）
-static void AddCardToMulti(uint8_t door_idx, DoorDir dir, uint32_t card_number)
+// 将卡加入多卡组合
+static void AddCardToMulti(uint8_t door_idx, DoorDir dir, uint32_t card_number, uint16_t user_uid)
 {
     MultiCardState *state = &g_multi_state[door_idx][dir];
     if (!state->active) return;
-    // 去重
+
     for (int i = 0; i < state->current_cards; i++) {
         if (state->card_ids[i] == card_number) return;
     }
     state->card_ids[state->current_cards++] = card_number;
     printf("Multi-card: added card %08X, now %d/%d\n", (unsigned int)card_number, state->current_cards, state->required_cards);
     if (state->current_cards == state->required_cards) {
+    	uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 0 : 1);
+    	report_event(EVENT_SINGLE_UNLOCK + (state->required_cards - 1), point, card_number, user_uid); //多卡开锁
         DoUnlock(state->reader_id, state->door_idx, state->dir, state->required_cards, false);
         ClearMultiState(state->door_idx, state->dir);
     } else {
-        state->timeout_ms = 15000; // 重置超时
+        state->timeout_ms = MULTI_CARD_TIMEOUT_MS; // 重置超时
     }
 }
 
 
-// 处理有效卡（根据开门方式决定后续动作）
+// 处理有效卡
 static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, uint32_t card_number,
-                             uint8_t *user_buf, uint8_t perm_byte2)
+                             uint8_t *user_buf, uint8_t perm_byte2, uint16_t user_uid)
 {
     uint8_t open_mode = perm_byte2 & 0x07;
     uint8_t first_mode = (perm_byte2 >> 3) & 0x03;
     bool need_remote = (perm_byte2 >> 5) & 0x01;
     bool card_plus_pwd = (perm_byte2 >> 6) & 0x01;
+    uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 0 : 1);
 
     // 首卡处理
     if (first_mode == 1) {
         printf("Event: %d (Reader%d, Door%d)\r\n", EVENT_FIRST_CARD, reader_id, door_idx+1);
+        report_event(EVENT_FIRST_CARD, point, card_number, user_uid);
         g_first_card_flag[door_idx][dir] = true;
         DoUnlock(reader_id, door_idx, dir, 1, false);
         return;
     } else if (first_mode == 2) {
         if (!g_first_card_flag[door_idx][dir]) {
             printf("Event: %d (Reader%d, Door%d)\r\n", EVENT_NO_FIRST_CARD, reader_id, door_idx+1);
+            report_event(EVENT_NO_FIRST_CARD, point, card_number, user_uid);
             return;
         }
     }
@@ -283,18 +280,18 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
     // 单卡开门方式
     if (open_mode == 1) {
         if (card_plus_pwd) {
-		 // 使用按键收集器，记录卡号，统一使用进门方向
 			KeyCollectState *key_state = &g_key_state[door_idx][dir];
 			memset(key_state, 0, sizeof(KeyCollectState));
 			key_state->active = true;
 			key_state->reader_id = reader_id;
 			key_state->door_idx = door_idx;
-			key_state->dir = dir;   // 强制进门
+			key_state->dir = dir;
 			key_state->card_number = card_number;
 			key_state->pwd_len = 0;
-			key_state->timeout_ms = 15000;
+			key_state->timeout_ms = MULTI_CARD_TIMEOUT_MS;
 			printf("Event: %d (Reader%d, Door%d)\n", EVENT_WAIT_PWD, reader_id, door_idx+1);
         } else {
+        	report_event(EVENT_SINGLE_CARD, point, card_number, user_uid);  //单卡开门
             if (need_remote) {
                 printf("Request remote confirm for card %08X\r\n", (unsigned int)card_number);
             }
@@ -302,6 +299,16 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
         }
     } else if (open_mode >= 2 && open_mode <= 5) {
     		MultiCardState *state = &g_multi_state[door_idx][dir];
+    		uint8_t card_seq = 1;
+    		if (state->active) {
+    		    card_seq = state->current_cards + 1;
+    		}
+
+    		bool is_last = (card_seq == open_mode);
+    		if (!is_last) {
+    		report_event(EVENT_SINGLE_CARD + (card_seq - 1), point, card_number, user_uid);  //多卡刷卡
+    		}
+
 			if (!state->active) {
 				memset(state, 0, sizeof(MultiCardState));
 				state->active = true;
@@ -310,7 +317,7 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 				state->dir = dir;
 				state->required_cards = open_mode;
 				state->current_cards = 0;
-				state->timeout_ms = 15000;
+				state->timeout_ms = MULTI_CARD_TIMEOUT_MS;
 			}
 			if (state->waiting_for_pwd) {
 				printf("Multi-card: waiting for password, please input password first.\n");
@@ -321,15 +328,15 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 				state->pending_card = card_number;
 				state->pwd_len = 0;
 				memset(state->pwd_buf, 0, sizeof(state->pwd_buf));
-				state->timeout_ms = 15000;
+				state->timeout_ms = PWD_WAIT_TIMEOUT_MS;
 				printf("Event: %d (Reader%d, Door%d) multi-card waiting password for card %08X\n", EVENT_WAIT_PWD, reader_id, door_idx+1, (unsigned int)card_number);
 			} else {
-				AddCardToMulti(door_idx, dir, card_number);
+				AddCardToMulti(door_idx, dir, card_number, user_uid);
 			}
 		}
 }
 
-// ==================== 对外接口实现 ====================
+
 
 void WiegandAccess_Init(void)
 {
@@ -350,14 +357,14 @@ void WiegandAccess_ProcessCard(uint8_t reader_id, uint8_t wiegand_bits, uint32_t
     uint8_t door_idx;
     DoorDir dir;
     switch (reader_id) {
-        case 1: door_idx = 0; dir = DOOR_ENTRY; break;  // 门1进门
-        case 2: door_idx = 0; dir = DOOR_EXIT;  break;  // 门1出门
-        case 3: door_idx = 1; dir = DOOR_ENTRY; break;  // 门2进门
-        case 4: door_idx = 1; dir = DOOR_EXIT;  break;  // 门2出门
+    	case 1: door_idx = 0; dir = DOOR_EXIT;  break;   // 门1出门
+		case 2: door_idx = 0; dir = DOOR_ENTRY; break;   // 门1进门
+		case 3: door_idx = 1; dir = DOOR_EXIT;  break;   // 门2出门
+		case 4: door_idx = 1; dir = DOOR_ENTRY; break;   // 门2进门
         default: return;
     }
 
-    // 清除相同读头（door_idx, dir）的密码等待状态
+    // 清除相同方向的密码等待状态
     if (g_key_state[door_idx][dir].active) {
         ClearKeyCollector(door_idx, dir);
     }
@@ -365,41 +372,45 @@ void WiegandAccess_ProcessCard(uint8_t reader_id, uint8_t wiegand_bits, uint32_t
         ClearMultiState(door_idx, dir);
     }
 
-    // ========== 优先检查特殊卡（超级卡、胁迫卡） ==========
+
     DoorConfig *door_cfg = &sys_door.door[door_idx][dir];
     if (card_number == door_cfg->release_card) {
-        printf("Event: %d (Reader%d, Door%d %s)\r\n", EVENT_MASTER_CARD_UNLOCK, reader_id, door_idx+1, dir==DOOR_ENTRY?"IN":"OUT");
+        printf("Event: %d (Reader%d, Door%d %s)\r\n", EVENT_MASTER_CARD_UNLOCK, reader_id, door_idx+1, dir==DOOR_EXIT?"IN":"OUT");
+        report_event(EVENT_MASTER_CARD_UNLOCK, (door_idx*2 + (dir==DOOR_ENTRY?0:1)),card_number, 0xFFFF); //超级卡开门
         DoUnlock(reader_id, door_idx, dir, 1, false);
         return;
     }
     if (card_number == door_cfg->duress_card) {
-        printf("Event: %d (Reader%d, Door%d %s)\r\n", EVENT_DURESS_CARD_UNLOCK, reader_id, door_idx+1, dir==DOOR_ENTRY?"IN":"OUT");
+        printf("Event: %d (Reader%d, Door%d %s)\r\n", EVENT_DURESS_CARD_UNLOCK, reader_id, door_idx+1, dir==DOOR_EXIT?"IN":"OUT");
+        report_event(EVENT_DURESS_CARD_UNLOCK, (door_idx*2 + (dir==DOOR_ENTRY?0:1)),card_number, 0xFFFF); //胁迫卡开门
         DoUnlock(reader_id, door_idx, dir, 1, false);
         return;
     }
 
-    // ========== 查找普通用户 ==========
+
     uint8_t user_buf[26];
     uint32_t uid = FindUserByCard(card_number, user_buf);
     if (uid == 0) {
         printf("Event: %d (Card %08X, Reader%d)\r\n", EVENT_CARD_NOT_REG, (unsigned int)card_number, reader_id);
+        report_event(EVENT_CARD_NOT_REG, (door_idx*2 + (dir==DOOR_ENTRY?0:1)),card_number, 0xFFFF); //未登记卡
         return;
     }
 
-    // 解析门权限（用户表偏移11开始，每门4字节：进2字节、出2字节）
+    // 解析门权限
     uint8_t *perm = user_buf + 10;
     uint16_t door_perm;
     if (dir == DOOR_ENTRY) {
-        door_perm = *(uint16_t*)(perm + door_idx * 4);      // 进门偏移0
+        door_perm = *(uint16_t*)(perm + door_idx * 4);      // 进门
     } else {
-        door_perm = *(uint16_t*)(perm + door_idx * 4 + 2);  // 出门偏移2
+        door_perm = *(uint16_t*)(perm + door_idx * 4 + 2);  // 出门
     }
     uint8_t perm_byte1 = door_perm & 0xFF;
     uint8_t perm_byte2 = (door_perm >> 8) & 0xFF;
-
+    uint16_t user_uid =  user_buf[1] << 8 | user_buf[0];
     // 用户有效位检查（bit7）
     if ((perm_byte2 & 0x80) == 0) {
         printf("Event: %d (Card %08X, Reader%d)\r\n", EVENT_CARD_NO_PERM, (unsigned int)card_number, reader_id);
+        report_event(EVENT_CARD_NO_PERM, (door_idx*2 + (dir==DOOR_ENTRY?0:1)), card_number, user_uid);  //35 非法卡
         return;
     }
 
@@ -408,16 +419,19 @@ void WiegandAccess_ProcessCard(uint8_t reader_id, uint8_t wiegand_bits, uint32_t
     uint8_t holiday_id = (perm_byte1 >> 4) & 0x0F;
     if (!CheckTimePermission(weekly_id, holiday_id, door_idx, dir)) {
         printf("Event: %d (Reader%d, Door%d %s)\r\n", EVENT_TIME_OUT, reader_id, door_idx+1, dir==DOOR_ENTRY?"IN":"OUT");
+        report_event(EVENT_TIME_OUT, (door_idx*2 + (dir==DOOR_ENTRY?0:1)), card_number, user_uid);    //66 时段外刷卡
         return;
     }
 
     // 打印刷卡事件
+
     uint8_t open_mode = perm_byte2 & 0x07;
     uint8_t event_card = EVENT_SINGLE_CARD;
-    if (open_mode >= 1 && open_mode <= 5) event_card = EVENT_SINGLE_CARD + (open_mode - 1);
-    printf("Event: %d (Reader%d, Card %08X)\r\n", event_card, reader_id, (unsigned int)card_number);
+    if (open_mode >= 1 && open_mode <= 5)  event_card = EVENT_SINGLE_CARD + (open_mode - 1);
+    printf("Event: %d (UID%d, Card %08X)\r\n", event_card, (unsigned int)user_uid, (unsigned int)card_number);
+   // report_event(event_card, (door_idx*2 + (dir==DOOR_ENTRY?0:1)), card_number, user_uid);  //有效卡
 
-    ProcessValidCard(reader_id, door_idx, dir, card_number, user_buf, perm_byte2);
+    ProcessValidCard(reader_id, door_idx, dir, card_number, user_buf, perm_byte2, user_uid);
 }
 
 
@@ -428,10 +442,10 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
     uint8_t door_idx;
     DoorDir dir;
     switch (reader_id) {
-        case 1: door_idx = 0; dir = DOOR_ENTRY; break;
-        case 2: door_idx = 0; dir = DOOR_EXIT;  break;
-        case 3: door_idx = 1; dir = DOOR_ENTRY; break;
-        case 4: door_idx = 1; dir = DOOR_EXIT;  break;
+    	case 1: door_idx = 0; dir = DOOR_EXIT;  break;
+		case 2: door_idx = 0; dir = DOOR_ENTRY; break;
+		case 3: door_idx = 1; dir = DOOR_EXIT;  break;
+		case 4: door_idx = 1; dir = DOOR_ENTRY; break;
         default: return;
     }
 
@@ -467,10 +481,11 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
             uint8_t user_buf[26];
             uint32_t uid = FindUserByCard(multi_state->pending_card, user_buf);
             if (uid != 0) {
+            	uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
                 uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
                 if (VerifyPassword(stored_pwd, multi_state->pwd_buf)) {
                     printf("Multi-card password correct, adding card.\n");
-                    AddCardToMulti(door_idx, dir, multi_state->pending_card);
+                    AddCardToMulti(door_idx, dir, multi_state->pending_card, user_uid);
                     multi_state->waiting_for_pwd = false;
                     multi_state->pending_card = 0;
                     multi_state->pwd_len = 0;
@@ -504,28 +519,33 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
                 ClearKeyCollector(door_idx, dir);
                 handled = true;
             } else {
-                // 独立密码验证（超级/胁迫/解除密码）
-                bool pwd_matched = false;
-                uint32_t encoded_pwd = EncodePassword(key_state->pwd_buf);
-                DoorConfig *door_cfg = &sys_door.door[key_state->door_idx][key_state->dir];
-                if (encoded_pwd == door_cfg->master_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_MASTER_PWD_UNLOCK, reader_id);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                } else if (encoded_pwd == door_cfg->duress_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_DURESS_PWD_UNLOCK, reader_id);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                } else if (encoded_pwd == door_cfg->release_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_RELEASE_PWD_UNLOCK, reader_id);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                }
-                if (!pwd_matched) {
-                    printf("Event: %d (Reader%d) - invalid independent password\n", EVENT_PWD_ERROR, reader_id);
-                }
-                ClearKeyCollector(door_idx, dir);
-                handled = true;
+			  // 独立密码验证（超级/胁迫/解除密码）
+				bool pwd_matched = false;
+				uint32_t encoded_pwd = EncodePassword(key_state->pwd_buf);
+				DoorConfig *door_cfg = &sys_door.door[key_state->door_idx][key_state->dir];
+				uint8_t point = key_state->door_idx * 2 + (key_state->dir == DOOR_ENTRY ? 0 : 1);
+				if (encoded_pwd == door_cfg->master_password) {
+					printf("Event: %d (Reader%d)\n", EVENT_MASTER_PWD_UNLOCK, reader_id);
+					report_event(EVENT_MASTER_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+					DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+					pwd_matched = true;
+				} else if (encoded_pwd == door_cfg->duress_password) {
+					printf("Event: %d (Reader%d)\n", EVENT_DURESS_PWD_UNLOCK, reader_id);
+					report_event(EVENT_DURESS_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+					DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+					pwd_matched = true;
+				} else if (encoded_pwd == door_cfg->release_password) {
+					printf("Event: %d (Reader%d)\n", EVENT_RELEASE_PWD_UNLOCK, reader_id);
+					report_event(EVENT_RELEASE_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+					DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+					pwd_matched = true;
+				}
+				if (!pwd_matched) {
+					printf("Event: %d (Reader%d) - invalid independent password\n", EVENT_PWD_ERROR, reader_id);
+					report_event(EVENT_PWD_ERROR, point, 0xFFFFFFFF, 0xFFFF);
+				}
+				ClearKeyCollector(door_idx, dir);
+				handled = true;
             }
         }
 
@@ -587,246 +607,6 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
     }
 }
 
-/*
- * 这个函数是 对应韦根26进 韦根34出
-void WiegandAccess_ProcessCard(uint8_t reader_id, uint8_t wiegand_bits, uint32_t card_number)
-{
-    if (reader_id < 1 || reader_id > 4) return;
-    uint8_t door_idx = reader_id - 1;
-    DoorDir dir = (wiegand_bits == 26) ? DOOR_ENTRY : DOOR_EXIT;
-
-    // 清除相同读头的密码等待状态
-    if (g_key_state[door_idx][DOOR_ENTRY].active) {
-        ClearKeyCollector(door_idx, DOOR_ENTRY);
-    }
-    if (g_multi_state[door_idx][DOOR_ENTRY].active && g_multi_state[door_idx][DOOR_ENTRY].waiting_for_pwd) {
-        ClearMultiState(door_idx, DOOR_ENTRY);
-    }
-
-    // ========== 优先检查特殊卡（超级卡、胁迫卡、解除卡） ==========
-    DoorConfig *door_cfg = &sys_door.door[door_idx][dir];
-    if (card_number == door_cfg->release_card) {
-        printf("Event: %d (Reader%d, Door%d)\r\n", EVENT_MASTER_CARD_UNLOCK, reader_id, door_idx+1);
-        DoUnlock(reader_id, door_idx, dir, 1, false);
-        return;
-    }
-    if (card_number == door_cfg->duress_card) {
-        printf("Event: %d (Reader%d, Door%d)\r\n", EVENT_DURESS_CARD_UNLOCK, reader_id, door_idx+1);
-        DoUnlock(reader_id, door_idx, dir, 1, false);
-        return;
-    }
-    // 胁迫解除卡（若结构体中未单独定义，可复用 release_card 但需区分，暂不实现）
-
-    // ========== 查找普通用户 ==========
-    uint8_t user_buf[26];
-    uint32_t uid = FindUserByCard(card_number, user_buf);
-    if (uid == 0) {
-        printf("Event: %d (Card %08X, Reader%d)\r\n", EVENT_CARD_NOT_REG, (unsigned int)card_number, reader_id);
-        return;
-    }
-
-    // 解析门权限
-    uint8_t *perm = user_buf + 10;
-    uint16_t door_perm = (dir == DOOR_ENTRY) ? *(uint16_t*)(perm + door_idx*4) : *(uint16_t*)(perm + door_idx*4 + 2);
-    uint8_t perm_byte1 = door_perm & 0xFF;
-    uint8_t perm_byte2 = (door_perm >> 8) & 0xFF;
-
-    // 用户有效位检查（bit7）
-    if ((perm_byte2 & 0x80) == 0) {
-        printf("Event: %d (Card %08X, Reader%d)\r\n", EVENT_CARD_NO_PERM, (unsigned int)card_number, reader_id);
-        return;
-    }
-
-    // 时段检查
-    uint8_t weekly_id = perm_byte1 & 0x0F;
-    uint8_t holiday_id = (perm_byte1 >> 4) & 0x0F;
-    if (!CheckTimePermission(weekly_id, holiday_id, door_idx, dir)) {
-        printf("Event: %d (Reader%d, Door%d)\r\n", EVENT_TIME_OUT, reader_id, door_idx+1);
-        return;
-    }
-
-    // 打印刷卡事件
-    uint8_t open_mode = perm_byte2 & 0x07;
-    uint8_t event_card = EVENT_SINGLE_CARD;
-    if (open_mode >= 1 && open_mode <= 5) event_card = EVENT_SINGLE_CARD + (open_mode - 1);
-    printf("Event: %d (Reader%d, Card %08X)\r\n", event_card, reader_id, (unsigned int)card_number);
-
-    // 处理开门逻辑
-    ProcessValidCard(reader_id, door_idx, dir, card_number, user_buf, perm_byte2);
-}
-
-//对应 韦根26与34区分进去
-void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
-{
-    if (reader_id < 1 || reader_id > 4) return;
-    uint8_t door_idx = reader_id - 1;
-    DoorDir dir = DOOR_ENTRY;  // 密码统一使用进门方向
-
-    // 获取各状态指针
-    KeyCollectState *key_state = &g_key_state[door_idx][dir];
-    MultiCardState *multi_state = &g_multi_state[door_idx][dir];
-
-    // 处理 * 键（删除一位）
-    if (key_value == 0x0A) {
-        // 优先处理多卡密码等待
-        if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id) {
-            if (multi_state->pwd_len > 0) {
-                multi_state->pwd_len--;
-                multi_state->pwd_buf[multi_state->pwd_len] = '\0';
-                multi_state->timeout_ms = 15000;
-                printf("Multi-card password deleted, current: %s\n", multi_state->pwd_buf);
-            }
-        }
-        // 其次处理单卡密码等待（刷卡后的卡+密码 或 独立密码）
-        else if (key_state->active && key_state->reader_id == reader_id) {
-            if (key_state->pwd_len > 0) {
-                key_state->pwd_len--;
-                key_state->pwd_buf[key_state->pwd_len] = '\0';
-                key_state->timeout_ms = 30000;
-                printf("Password deleted, current: %s\n", key_state->pwd_buf);
-            }
-        }
-        return;
-    }
-
-    // 处理 # 键（提交密码）
-    if (key_value == 0x0B) {
-        bool handled = false;
-
-        // 1. 多卡密码等待
-        if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id && multi_state->pwd_len > 0) {
-            uint8_t user_buf[26];
-            uint32_t uid = FindUserByCard(multi_state->pending_card, user_buf);
-            if (uid != 0) {
-                uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
-                if (VerifyPassword(stored_pwd, multi_state->pwd_buf)) {
-                    printf("Multi-card password correct, adding card.\n");
-                    AddCardToMulti(door_idx, dir, multi_state->pending_card);
-                    multi_state->waiting_for_pwd = false;
-                    multi_state->pending_card = 0;
-                    multi_state->pwd_len = 0;
-                    memset(multi_state->pwd_buf, 0, sizeof(multi_state->pwd_buf));
-                } else {
-                    printf("Multi-card password error, aborting multi-card process.\n");
-                    ClearMultiState(door_idx, dir);
-                }
-            } else {
-                ClearMultiState(door_idx, dir);
-            }
-            handled = true;
-            if (key_state->active) ClearKeyCollector(door_idx, dir);
-        }
-
-        // 2. 单卡密码等待（包括刷卡后的卡+密码 或 独立密码）
-        if (!handled && key_state->active && key_state->reader_id == reader_id && key_state->pwd_len > 0) {
-            if (key_state->card_number != 0) {
-                // 普通卡+密码验证
-                uint8_t user_buf[26];
-                uint32_t uid = FindUserByCard(key_state->card_number, user_buf);
-                if (uid != 0) {
-                    uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
-                    if (VerifyPassword(stored_pwd, key_state->pwd_buf)) {
-                        printf("Event: %d (Reader%d)\n", EVENT_PWD_UNLOCK, reader_id);
-                        DoUnlock(reader_id, door_idx, DOOR_ENTRY, 1, true);
-                    } else {
-                        printf("Event: %d (Reader%d)\n", EVENT_PWD_ERROR, reader_id);
-                    }
-                }
-                ClearKeyCollector(door_idx, dir);
-                handled = true;
-            } else {
-            	// 独立密码验证（超级/胁迫/解除密码） - 同时比对进门和出门方向
-            	bool pwd_matched = false;
-            	uint32_t encoded_pwd = EncodePassword(key_state->pwd_buf);
-            	for (int d = 0; d < 2; d++) {  // d=0: DOOR_ENTRY, d=1: DOOR_EXIT
-            	    DoorConfig *door_cfg = &sys_door.door[door_idx][d];
-            	    if (encoded_pwd == door_cfg->master_password) {
-            	        printf("Event: %d (Reader%d)\n", EVENT_MASTER_PWD_UNLOCK, reader_id);
-            	        DoUnlock(reader_id, door_idx, DOOR_ENTRY, 1, true);
-            	        pwd_matched = true;
-            	        break;
-            	    } else if (encoded_pwd == door_cfg->duress_password) {
-            	        printf("Event: %d (Reader%d)\n", EVENT_DURESS_PWD_UNLOCK, reader_id);
-            	        DoUnlock(reader_id, door_idx, DOOR_ENTRY, 1, true);
-            	        pwd_matched = true;
-            	        break;
-            	    } else if (encoded_pwd == door_cfg->release_password) {
-            	        printf("Event: %d (Reader%d)\n", EVENT_RELEASE_PWD_UNLOCK, reader_id);
-            	        DoUnlock(reader_id, door_idx, DOOR_ENTRY, 1, true);
-            	        pwd_matched = true;
-            	        break;
-            	    }
-            	}
-            	if (!pwd_matched) {
-            	    printf("Event: %d (Reader%d) - invalid independent password\n", EVENT_PWD_ERROR, reader_id);
-            	}
-            	ClearKeyCollector(door_idx, dir);
-            	handled = true;
-            }
-        }
-
-        if (!handled) {
-            printf("Password input without active wait, ignored.\n");
-        }
-        return;
-    }
-
-    // 处理数字键 0-9
-    if (key_value >= 0 && key_value <= 9) {
-        // 优先处理多卡密码等待
-        if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id) {
-            if (multi_state->pwd_len < 8) {
-                multi_state->pwd_buf[multi_state->pwd_len++] = '0' + key_value;
-                multi_state->pwd_buf[multi_state->pwd_len] = '\0';
-                multi_state->timeout_ms = 15000;
-                printf("Multi-card password input: %s\n", multi_state->pwd_buf);
-            } else {
-                printf("Multi-card password max length reached, press # to submit.\n");
-            }
-            return;
-        }
-
-        // 处理单卡密码等待（刷卡后的卡+密码）
-        if (key_state->active && key_state->reader_id == reader_id) {
-            key_state->timeout_ms = 15000;
-            if (key_state->pwd_len < 8) {
-                key_state->pwd_buf[key_state->pwd_len++] = '0' + key_value;
-                key_state->pwd_buf[key_state->pwd_len] = '\0';
-                printf("Password input: %s\n", key_state->pwd_buf);
-            } else {
-                // 简单处理：不自动提交，等待用户按 #
-                printf("Password max length reached, press # to submit.\n");
-            }
-            return;
-        }
-
-        // ========== 独立密码输入（无刷卡，无等待状态） ==========
-        // 激活新的独立密码收集状态
-        if (!key_state->active) {
-            key_state->active = true;
-            key_state->reader_id = reader_id;
-            key_state->door_idx = door_idx;
-            key_state->dir = DOOR_ENTRY;
-            key_state->card_number = 0;   // 标记为独立密码
-            key_state->pwd_len = 0;
-            memset(key_state->pwd_buf, 0, sizeof(key_state->pwd_buf));
-            key_state->timeout_ms = 15000;
-            printf("Independent password input started.\n");
-        }
-        // 刷新超时并收集密码
-        key_state->timeout_ms = 15000;
-        if (key_state->pwd_len < 8) {
-            key_state->pwd_buf[key_state->pwd_len++] = '0' + key_value;
-            key_state->pwd_buf[key_state->pwd_len] = '\0';
-            printf("Password input: %s\n", key_state->pwd_buf);
-        } else {
-            printf("Password max length reached, press # to submit.\n");
-        }
-        return;
-    }
-}
-
-*/
 
 void WiegandAccess_TimerTick(void)
 {
