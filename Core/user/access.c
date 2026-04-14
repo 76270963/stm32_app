@@ -170,6 +170,9 @@ static bool CheckTimePermission(uint8_t weekly_id, uint8_t holiday_id, uint8_t d
     return true;
 }
 
+
+
+
 // 输出开门信号（打印事件，实际需替换为硬件操作）
 static void DoUnlock(uint8_t reader_id, uint8_t door_idx, DoorDir dir, uint8_t card_count, bool is_password)
 {
@@ -252,6 +255,64 @@ static void AddCardToMulti(uint8_t door_idx, DoorDir dir, uint32_t card_number, 
 }
 
 
+
+// 检查反潜回权限（开启功能时）
+static bool AntiPassbackCheck(uint8_t door_idx, DoorDir dir, uint16_t user_uid)
+{
+    if (!(sys_para.feature_flags & 0x02)) {
+        return true;
+    }
+    uint32_t addr = ANTI_USER_START_ADDR + (user_uid - 1) * 4;
+    uint8_t entry[4];
+    w25q128_read_data(addr, entry, 4);
+    printf("AntiPassback: uid=%u, dir=%s, door_idx=%d, entry[3]=0x%02X\n",
+           user_uid, dir==DOOR_ENTRY?"IN":"OUT", door_idx, entry[3]);
+    if (entry[0] == 0xFF && entry[1] == 0xFF && entry[2] == 0xFF && entry[3] == 0xFF) {
+        if (dir == DOOR_ENTRY) {
+            entry[0] = user_uid & 0xFF;
+            entry[1] = (user_uid >> 8) & 0xFF;
+            entry[2] = 0;
+            entry[3] = 0;
+            entry[3] |= (1 << door_idx);
+            writeW25q128(addr, entry, 4);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    uint16_t stored_uid = (entry[1] << 8) | entry[0];
+    if (stored_uid != user_uid) {
+        uint8_t clear[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+        writeW25q128(addr, clear, 4);
+        return AntiPassbackCheck(door_idx, dir, user_uid);
+    }
+    uint8_t flag = entry[3];
+    uint8_t bit = (1 << door_idx);
+    if (dir == DOOR_ENTRY) {
+        if ((flag & bit) == 0) {
+            flag |= bit;
+            entry[3] = flag;
+            writeW25q128(addr, entry, 4);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        if ((flag & bit) != 0) {
+            flag &= ~bit;
+            entry[3] = flag;
+            writeW25q128(addr, entry, 4);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+
+
+
+
 // 处理有效卡
 static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, uint32_t card_number,
                              uint8_t *user_buf, uint8_t perm_byte2, uint16_t user_uid)
@@ -286,6 +347,12 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
     {
         if (card_plus_pwd)
         {
+        	// 反潜回检查
+        	if (!AntiPassbackCheck(door_idx, dir, user_uid))
+        	{
+				report_event(EVENT_ANTI_PASSBACK_EXIT, point, card_number, user_uid);
+				return;
+			}
 			KeyCollectState *key_state = &g_key_state[door_idx][dir];
 			memset(key_state, 0, sizeof(KeyCollectState));
 			key_state->active = true;
@@ -300,6 +367,12 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
         }
         else
         {
+        	// 反潜回检查
+			if (!AntiPassbackCheck(door_idx, dir, user_uid))
+			{
+				report_event(EVENT_ANTI_PASSBACK_EXIT, point, card_number, user_uid);
+				return;
+			}
         	report_event(EVENT_SINGLE_CARD, point, card_number, user_uid);  //单卡开门
             if (need_remote)
             {
@@ -374,6 +447,12 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 		}
 		else
 		{
+			// 反潜回检查
+			if (!AntiPassbackCheck(door_idx, dir, user_uid))
+			{
+				report_event(EVENT_ANTI_PASSBACK_EXIT, point, card_number, user_uid);
+				return;
+			}
 			AddCardToMulti(door_idx, dir, card_number, user_uid);
 		}
 	}
@@ -539,6 +618,15 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
 				uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 0 : 1);
                 if (VerifyPassword(stored_pwd, multi_state->pwd_buf))
                 {
+                	 // 反潜回检查
+					if (!AntiPassbackCheck(door_idx, dir, user_uid)) {
+						report_event(EVENT_ANTI_PASSBACK_EXIT, point, multi_state->pending_card, user_uid);
+						ClearMultiState(door_idx, dir);
+						handled = true;
+						if (key_state->active) ClearKeyCollector(door_idx, dir);
+						return;
+					}
+
 					if (is_last) {
 						// 最后一张卡：上报多卡密码开锁（71）
 						report_event(EVENT_MULTI_PWD_UNLOCK, point, multi_state->pending_card, user_uid);
