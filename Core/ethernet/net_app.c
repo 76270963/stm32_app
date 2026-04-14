@@ -298,6 +298,7 @@ static void handle_system_Reset(ReplyBuilder *rb, uint8_t socket)
 {
 	rb->data_len = 0;
 	reply_send(rb, socket);
+	printf("[OTA] Copying OTA firmware to RAM...\r\n");
 	uint8_t OTASIGN[4] = {0};
 	OTASIGN[0] = 0xAA;
 	OTASIGN[1] = 0xAA;
@@ -527,6 +528,76 @@ void read_event_log_total_num(ReplyBuilder *rb, uint8_t socket)
 	reply_send(rb, socket);
 }
 
+//清空反潜回表
+void ClearAllAntiPassbackTable(void)
+{
+    uint32_t total_size = MAX_USER_COUNT * 4;   // 每个用户4字节
+    uint32_t addr = ANTI_USER_START_ADDR;
+    uint8_t buffer[2048];
+    memset(buffer, 0xFF, sizeof(buffer));
+    uint32_t remaining = total_size;
+    while (remaining > 0) {
+        uint16_t write_len = (remaining > sizeof(buffer)) ? sizeof(buffer) : remaining;
+        writeW25q128(addr, buffer, write_len);
+        addr += write_len;
+        remaining -= write_len;
+    }
+}
+
+
+//删除全部内容
+void handle_delete_all_antiuser(ReplyBuilder *rb, uint8_t socket)
+{
+	rb->data_len = 0;
+	reply_send(rb, socket);
+	ClearAllAntiPassbackTable();
+}
+
+
+//删除指定用户
+void handle_delete_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+	uint16_t user_id = (req_buf[11] << 8) | req_buf[10];
+	printf("Delete user: recv bytes[10]=0x%02X, [11]=0x%02X, user_id=%u\n", req_buf[10], req_buf[11], user_id);
+	if (user_id < 1 || user_id > MAX_USER_COUNT)
+	   return;
+	uint32_t addr = ANTI_USER_START_ADDR + (user_id - 1) * 4;
+	uint8_t clear_data[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+	writeW25q128(addr, clear_data, 4);
+	reply_add_byte(rb, req_buf[10]);
+	reply_add_byte(rb, req_buf[11]);
+	reply_add_byte(rb, 0x01);
+	rb->data_len = 3;
+	reply_send(rb, socket);
+}
+
+//读取全部信息
+void handle_read_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+	uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+	uint32_t addr = ANTI_USER_START_ADDR + block_idx * 1024;
+	uint8_t  data[1024];
+	uint16_t block = MAX_USER_COUNT / 256;
+	w25q128_read_data(addr, data, 1024);
+    if(block_idx < block)
+    {
+		reply_add_byte(rb, req_buf[10]);
+		reply_add_byte(rb, req_buf[11]);
+		for (int i = 0; i < 1024; i++)
+		{
+			reply_add_byte(rb, data[i]);
+		}
+		rb->data_len =1026;
+    }
+    else
+    {
+    	reply_add_byte(rb, 0xFF);
+		reply_add_byte(rb, 0xFF);
+		rb->data_len = 2;
+    }
+	reply_send(rb, socket);
+}
+
 
 //TCP数据处理
 void parse_tcp_data(uint8_t *buf, uint8_t socket)
@@ -583,6 +654,13 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 					if(CMD2 == 0x01) handle_read_holiday(&rb, buf, socket);
 					else if(CMD2 == 0X02) handle_write_holiday(&rb, buf, socket);
 					break;
+
+				case 0x11:
+					if(CMD2 == 0x00) handle_delete_all_antiuser(&rb, socket);
+					else if(CMD2 == 0x01) handle_read_antiuser(&rb, buf, socket);
+					else if(CMD2 == 0x02) handle_delete_antiuser(&rb, buf, socket);
+					break;
+
 
 				case 0xF1:
 					if(CMD2 == 0x01) read_event_log_total_num(&rb, socket);
