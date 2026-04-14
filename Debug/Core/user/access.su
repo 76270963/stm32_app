@@ -10,7 +10,7 @@
 ../Core/user/access.c:227:13:VerifyPassword	24	static
 ../Core/user/access.c:234:13:AddCardToMulti	48	static
 ../Core/user/access.c:256:13:ProcessValidCard	56	static
-../Core/user/access.c:341:6:WiegandAccess_Init	8	static
-../Core/user/access.c:351:6:WiegandAccess_ProcessCard	104	static
-../Core/user/access.c:438:6:WiegandAccess_ProcessKey	136	static
-../Core/user/access.c:611:6:WiegandAccess_TimerTick	72	static
+../Core/user/access.c:384:6:WiegandAccess_Init	8	static
+../Core/user/access.c:394:6:WiegandAccess_ProcessCard	104	static
+../Core/user/access.c:481:6:WiegandAccess_ProcessKey	152	static
+../Core/user/access.c:695:6:WiegandAccess_TimerTick	72	static

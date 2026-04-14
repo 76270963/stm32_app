@@ -9,8 +9,8 @@
 ../Core/user/access.c:205:17:EncodePassword	7
 ../Core/user/access.c:227:13:VerifyPassword	1
 ../Core/user/access.c:234:13:AddCardToMulti	5
-../Core/user/access.c:256:13:ProcessValidCard	14
-../Core/user/access.c:341:6:WiegandAccess_Init	1
-../Core/user/access.c:351:6:WiegandAccess_ProcessCard	23
-../Core/user/access.c:438:6:WiegandAccess_ProcessKey	47
-../Core/user/access.c:611:6:WiegandAccess_TimerTick	14
+../Core/user/access.c:256:13:ProcessValidCard	19
+../Core/user/access.c:384:6:WiegandAccess_Init	1
+../Core/user/access.c:394:6:WiegandAccess_ProcessCard	23
+../Core/user/access.c:481:6:WiegandAccess_ProcessKey	48
+../Core/user/access.c:695:6:WiegandAccess_TimerTick	14
