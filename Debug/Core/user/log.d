@@ -1,5 +1,5 @@
-Core/ethernet/net_app.o: ../Core/ethernet/net_app.c \
- ../Core/ethernet/net_app.h ../Core/Inc/main.h \
+Core/user/log.o: ../Core/user/log.c ../Core/user/log.h \
+ ../Core/user/pcf8563.h ../Core/Inc/main.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h \
  ../Core/Inc/stm32g0xx_hal_conf.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_rcc.h \
@@ -43,10 +43,9 @@ Core/ethernet/net_app.o: ../Core/ethernet/net_app.c \
  ../Core/user/usart.h ../Core/user/w25q128.h ../Core/user/pcf8563.h \
  ../Core/user/user.h ../Core/user/access.h ../Core/user/wiegand.h \
  ../Core/ethernet/w5500_hal.h ../Core/ethernet/net_app.h \
- ../Core/ethernet/net_services.h ../Core/ethernet/wizchip_conf.h \
- ../Core/ethernet/W5500/w5500.h ../Core/ethernet/wizchip_conf.h \
- ../Core/ethernet/socket.h ../Core/user/log.h ../Core/user/pcf8563.h
-../Core/ethernet/net_app.h:
+ ../Core/ethernet/net_services.h
+../Core/user/log.h:
+../Core/user/pcf8563.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -97,9 +96,3 @@ Core/ethernet/net_app.o: ../Core/ethernet/net_app.c \
 ../Core/ethernet/w5500_hal.h:
 ../Core/ethernet/net_app.h:
 ../Core/ethernet/net_services.h:
-../Core/ethernet/wizchip_conf.h:
-../Core/ethernet/W5500/w5500.h:
-../Core/ethernet/wizchip_conf.h:
-../Core/ethernet/socket.h:
-../Core/user/log.h:
-../Core/user/pcf8563.h:

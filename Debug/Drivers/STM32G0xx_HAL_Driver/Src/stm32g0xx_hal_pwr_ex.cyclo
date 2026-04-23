@@ -11,7 +11,7 @@
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:307:6:HAL_PWREx_DisableVddIO2	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:322:6:HAL_PWREx_EnablePVMUSB	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:335:6:HAL_PWREx_DisablePVMUSB	1
-../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:356:19:HAL_PWREx_ConfigPVM	9
+../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:356:19:HAL_PWREx_ConfigPVM	8
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:425:6:HAL_PWREx_EnableInternalWakeUpLine	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:434:6:HAL_PWREx_DisableInternalWakeUpLine	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:458:19:HAL_PWREx_EnableGPIOPullUp	7
@@ -29,6 +29,6 @@
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:847:6:HAL_PWREx_EnableLowPowerRunMode	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:862:19:HAL_PWREx_DisableLowPowerRunMode	3
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:904:6:HAL_PWREx_EnterSHUTDOWNMode	1
-../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:928:6:HAL_PWREx_PVD_PVM_IRQHandler	5
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:975:13:HAL_PWREx_PVD_PVM_Rising_Callback	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:986:13:HAL_PWREx_PVD_PVM_Falling_Callback	1
+../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:928:6:HAL_PWREx_PVD_PVM_IRQHandler	5

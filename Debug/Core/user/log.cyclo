@@ -1,0 +1,8 @@
+../Core/user/log.c:56:13:Log_SaveMeta	1
+../Core/user/log.c:19:6:Log_Init	5
+../Core/user/log.c:44:10:Log_GetUnreadCount	2
+../Core/user/log.c:68:6:Log_Write	1
+../Core/user/log.c:107:10:Log_PeekUnread	4
+../Core/user/log.c:126:6:Log_CommitRead	2
+../Core/user/log.c:133:10:Log_GetTotalAll	1
+../Core/user/log.c:139:10:Log_ReadAllBlock	4

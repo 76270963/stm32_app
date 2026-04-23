@@ -110,6 +110,8 @@ void SysPara_init(void)
     sys_para.custom_alarm4_output = 0;
 }
 
+
+
 void SysDoor_init(void)
 {
     for (int door_idx = 0; door_idx < DOOR_TOTAL_NUM; door_idx++)  // 门编号：0-3（对应原1-4）
@@ -142,5 +144,6 @@ void read_system_parameters(void)
 	WiegandAccess_Init();  // 初始化韦根刷卡模块
 	PCF8563_Init();
     W5500_Init_HAL();
+    Log_Init();
 	network_init();
 }

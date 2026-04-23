@@ -1,3 +1,3 @@
+../Core/user/wiegand.c:125:13:WiegandDecode	12
 ../Core/user/wiegand.c:22:6:HAL_GPIO_EXTI_Falling_Callback	17
 ../Core/user/wiegand.c:92:6:readwiegand	9
-../Core/user/wiegand.c:125:13:WiegandDecode	17

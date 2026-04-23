@@ -8,8 +8,10 @@
 #include "net_app.h"
 #include "wizchip_conf.h"
 #include "socket.h"
+#include "log.h"
 
 uint16_t BlockCount;
+
 
 //用于标记网络参数是否被修改
 volatile uint8_t network_params_changed = 0;
@@ -515,11 +517,11 @@ void handle_write_holiday(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t sock
 }
 
 
+
 //读取日志条数
 void read_event_log_total_num(ReplyBuilder *rb, uint8_t socket)
 {
-	uint32_t lognum = 0x00;
-
+	uint32_t lognum = Log_GetUnreadCount();
 	reply_add_byte(rb, lognum & 0xFF);
 	reply_add_byte(rb, (lognum >> 8) & 0xFF);
 	reply_add_byte(rb, (lognum >> 16) & 0xFF);
@@ -558,7 +560,6 @@ void handle_delete_all_antiuser(ReplyBuilder *rb, uint8_t socket)
 void handle_delete_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
 {
 	uint16_t user_id = (req_buf[11] << 8) | req_buf[10];
-	printf("Delete user: recv bytes[10]=0x%02X, [11]=0x%02X, user_id=%u\n", req_buf[10], req_buf[11], user_id);
 	if (user_id < 1 || user_id > MAX_USER_COUNT)
 	   return;
 	uint32_t addr = ANTI_USER_START_ADDR + (user_id - 1) * 4;
@@ -598,6 +599,68 @@ void handle_read_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t sock
 	reply_send(rb, socket);
 }
 
+static void handle_read_all_logs(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+    uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+    uint32_t total_blocks = (Log_GetTotalAll() + 63) / 64;
+
+    if (block_idx >= total_blocks) {
+        reply_add_byte(rb, 0xFF);
+        reply_add_byte(rb, 0xFF);
+        rb->data_len = 2;
+        reply_send(rb, socket);
+        return;
+    }
+
+    uint8_t log_data[1024];
+    uint32_t count = Log_ReadAllBlock(block_idx, log_data);
+    if (count == 0) {
+        reply_add_byte(rb, 0xFF);
+        reply_add_byte(rb, 0xFF);
+        rb->data_len = 2;
+        reply_send(rb, socket);
+        return;
+    }
+
+    reply_add_byte(rb, req_buf[10]);
+    reply_add_byte(rb, req_buf[11]);
+    for (uint32_t i = 0; i < count * LOG_SIZE_BYTES; i++) {
+        reply_add_byte(rb, log_data[i]);
+    }
+    rb->data_len = 2 + count * LOG_SIZE_BYTES;
+    reply_send(rb, socket);
+}
+
+
+static void handle_read_logs(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+    uint8_t log_data[1024];
+    uint32_t count = Log_PeekUnread(log_data);
+    if (count == 0)
+    {
+        // 没有新日志，返回结束标志
+        reply_add_byte(rb, 0xFF);
+        reply_add_byte(rb, 0xFF);
+        rb->data_len = 2;
+        reply_send(rb, socket);
+        return;
+    }
+
+    // 返回序号（原样返回）
+    reply_add_byte(rb, req_buf[10]);
+    reply_add_byte(rb, req_buf[11]);
+    // 追加日志数据
+    for (uint32_t i = 0; i < count * LOG_SIZE_BYTES; i++)
+    {
+        reply_add_byte(rb, log_data[i]);
+    }
+    rb->data_len = 2 + count * LOG_SIZE_BYTES;
+    reply_send(rb, socket);
+
+    Log_CommitRead(count);
+}
+
+
 
 //TCP数据处理
 void parse_tcp_data(uint8_t *buf, uint8_t socket)
@@ -623,36 +686,41 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 					else if (CMD2 == 0x02) handle_write_params(&rb, buf, socket);
 					break;
 
-				case 0x04:
+				case 0x04://OTA升级
 					if(CMD2 == 0x03) handle_read_ota(&rb, buf, socket);
 					else if(CMD2 == 0x04) handle_write_ota(&rb, buf, socket);
 					else if(CMD2 == 0x05) handle_system_Reset(&rb, socket);
 					break;
 
-				case 0x09:
+				case 0x09://时间
 					if(CMD2 == 0x01) handle_read_times(&rb, socket);
 					else if (CMD2 == 0x02) handle_write_times(&rb, buf, socket);
 					break;
 
-				case 0x0A:
+				case 0x0A://用户表
 					if(CMD2 == 0x00) handle_delete_user(&rb, socket);
 					else if(CMD2 == 0x01) handle_read_user(&rb, buf, socket);
 					else if(CMD2 == 0x02) handle_write_user(&rb, buf, socket);
 					break;
 
-				case 0x0B:
+				case 0x0B://门参数
 					if(CMD2 == 0x01) handle_read_door(&rb, socket);
 					else if (CMD2 == 0x02) handle_write_door(&rb, buf, socket);
 					break;
 
-				case 0x0C:
+				case 0x0C://周编程
 					if(CMD2 == 0x01) handle_read_weekly(&rb, buf, socket);
 					else if(CMD2 == 0X02) handle_write_weekly(&rb, buf, socket);
 					break;
 
-				case 0x0D:
+				case 0x0D: //假日
 					if(CMD2 == 0x01) handle_read_holiday(&rb, buf, socket);
 					else if(CMD2 == 0X02) handle_write_holiday(&rb, buf, socket);
+					break;
+
+				case 0x0E: //读事件记录
+					if(CMD2 == 0x01) handle_read_logs(&rb, buf, socket);
+					else if(CMD2 == 0X07) handle_read_all_logs(&rb, buf, socket);
 					break;
 
 				case 0x11:
@@ -732,6 +800,8 @@ uint8_t pack_heartbeat_data(void)
 }
 
 
+
+
 //事件类型1 + 点位1 + 卡号4 + UID2
 void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint16_t uid)
 {
@@ -758,7 +828,7 @@ void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint1
     // 获取当前时间
     DateTime dt;
     PCF8563_GetDateTime(&dt);
-    // 时间数据：年月日时分秒星期（每个1字节）
+    // 时间数据：年月日时分秒星期
     buf[idx++] = dt.year;
     buf[idx++] = dt.month;
     buf[idx++] = dt.day;
@@ -794,4 +864,5 @@ void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint1
     	printf("Event: %d (Card %08X, Point %d)\r\n", event_type, (unsigned int)card_number, point);
     }
 
+    Log_Write(event_type, point, card_number, uid, &dt);
 }

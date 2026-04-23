@@ -176,7 +176,8 @@ static void process_tcp_server(void)
 			else if (getSn_SR(TCP_SOCKET) == SOCK_CLOSED)
 			{
 				printf("TCP socket closed unexpectedly\n");
-				tcp_state = TCP_STATE_IDLE;
+				disconnect(TCP_SOCKET);
+				tcp_state = TCP_STATE_CLOSING;
 			}
 
 

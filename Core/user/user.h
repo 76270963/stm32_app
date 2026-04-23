@@ -43,7 +43,13 @@
 
 // 日志表 - 从 0x400000 (4MB边界) 开始，分配 4MB (实际3.2MB)
 #define LOG_START_ADDR          0x400000
-#define LOG_END_ADDR            0x7FFFFF   // 4MB
+#define LOG_END_ADDR            (LOG_START_ADDR + LOG_MAX_COUNT * LOG_SIZE_BYTES - 1)
+//#define LOG_END_ADDR            0x7FFFFF   // 4MB
+#define LOG_MAX_COUNT           200000     //20万条
+#define LOG_SIZE_BYTES          16
+
+// 日志元数据存储地址
+#define LOG_META_ADDR           0x800000
 
 // 剩余空间：0x800000 ~ 0xFFFFFF (8MB)
 

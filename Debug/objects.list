@@ -12,6 +12,7 @@
 "./Core/ethernet/w5500_hal.o"
 "./Core/ethernet/wizchip_conf.o"
 "./Core/user/access.o"
+"./Core/user/log.o"
 "./Core/user/pcf8563.o"
 "./Core/user/timApp.o"
 "./Core/user/usart.o"

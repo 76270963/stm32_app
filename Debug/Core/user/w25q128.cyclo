@@ -7,4 +7,4 @@
 ../Core/user/w25q128.c:72:6:w25q128_read_data	2
 ../Core/user/w25q128.c:87:6:w25q128_write_page	2
 ../Core/user/w25q128.c:106:6:w25q128_erase_sector	1
-../Core/user/w25q128.c:119:6:writeW25q128	5
+../Core/user/w25q128.c:119:6:writeW25q128	4

@@ -27,4 +27,7 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket);
 uint8_t pack_heartbeat_data(void);
 void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint16_t uid);
 
+
+
+
 #endif /* ETHERNET_NET_APP_H_ */
