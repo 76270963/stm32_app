@@ -163,6 +163,14 @@ void SetTime(const uint8_t *req_buf)
 	dt.weekday = calculate_weekday(real_year, dt.month, dt.day);
 
 	PCF8563_SetDateTime(&dt);
+	printf("set time: %04d-%02d-%02d %02d:%02d:%02d, weekday = %d\r\n",
+				dt.year + 2000,
+				dt.month,
+				dt.day,
+				dt.hour,
+				dt.minute,
+				dt.second,
+				dt.weekday);
 }
 
 
@@ -575,29 +583,49 @@ void handle_delete_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t so
 //读取全部信息
 void handle_read_antiuser(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
 {
-	uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
-	uint32_t addr = ANTI_USER_START_ADDR + block_idx * 1024;
-	uint8_t  data[1024];
-	uint16_t block = MAX_USER_COUNT / 256;
-	w25q128_read_data(addr, data, 1024);
-    if(block_idx < block)
-    {
-		reply_add_byte(rb, req_buf[10]);
-		reply_add_byte(rb, req_buf[11]);
-		for (int i = 0; i < 1024; i++)
-		{
+	//uint16_t block_idx = (req_buf[10] << 8) | req_buf[11];
+	uint16_t start_block = (req_buf[10] << 8) | req_buf[11];
+	uint16_t total_blocks = (MAX_USER_COUNT + 255) / 256;
+	uint8_t data[1024];
+	uint16_t found_block = 0xFFFF;
+
+	for (uint16_t blk = start_block; blk < total_blocks; blk++)
+	{
+		uint32_t addr = ANTI_USER_START_ADDR + blk * 1024;
+		w25q128_read_data(addr, data, 1024);
+		bool all_ff = true;
+		for (int i = 0; i < 1024; i++) {
+			if (data[i] != 0xFF) {
+				all_ff = false;
+				break;
+			}
+		}
+		if (!all_ff) {
+			found_block = blk;
+			break;
+		}
+	}
+
+	if (found_block != 0xFFFF)
+	{
+		// 返回实际找到的块索引（小端）
+		reply_add_byte(rb, found_block & 0xFF);
+		reply_add_byte(rb, (found_block >> 8) & 0xFF);
+		// 返回该块数据
+		for (int i = 0; i < 1024; i++) {
 			reply_add_byte(rb, data[i]);
 		}
-		rb->data_len =1026;
-    }
-    else
-    {
-    	reply_add_byte(rb, 0xFF);
+		rb->data_len = 1026;
+	} else {
+		// 所有块均为空，返回结束标志
+		reply_add_byte(rb, 0xFF);
 		reply_add_byte(rb, 0xFF);
 		rb->data_len = 2;
-    }
+	}
 	reply_send(rb, socket);
 }
+
+
 
 static void handle_read_all_logs(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
 {
@@ -723,7 +751,7 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 					else if(CMD2 == 0X07) handle_read_all_logs(&rb, buf, socket);
 					break;
 
-				case 0x11:
+				case 0x11://反潜回
 					if(CMD2 == 0x00) handle_delete_all_antiuser(&rb, socket);
 					else if(CMD2 == 0x01) handle_read_antiuser(&rb, buf, socket);
 					else if(CMD2 == 0x02) handle_delete_antiuser(&rb, buf, socket);

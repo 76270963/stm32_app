@@ -1,5 +1,5 @@
 ../Core/user/pcf8563.c:15:6:PCF8563_Init	32	static
-../Core/user/pcf8563.c:36:9:BCD2DEC	0	static
-../Core/user/pcf8563.c:46:9:DEC2BCD	16	static
-../Core/user/pcf8563.c:51:6:PCF8563_GetDateTime	48	static
-../Core/user/pcf8563.c:71:6:PCF8563_SetDateTime	32	static
+../Core/user/pcf8563.c:39:9:BCD2DEC	0	static
+../Core/user/pcf8563.c:49:9:DEC2BCD	16	static
+../Core/user/pcf8563.c:55:6:PCF8563_GetDateTime	48	static
+../Core/user/pcf8563.c:75:6:PCF8563_SetDateTime	56	static

@@ -15,15 +15,18 @@
 void PCF8563_Init(void)
 {
   uint8_t data[2];
-
-  /* 重置控制/状态寄存器1 */
+  // 停止RTC
   data[0] = PCF8563_CONTROL_STATUS1;
-  data[1] = 0x00;  // 清除所有标志位
+  data[1] = 0x01;
+  HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, data, 2, 100);
+  // 清除控制/状态寄存器2
+  data[0] = PCF8563_CONTROL_STATUS2;
+  data[1] = 0x00;
   HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, data, 2, 100);
 
-  /* 重置控制/状态寄存器2 */
-  data[0] = PCF8563_CONTROL_STATUS2;
-  data[1] = 0x00;  // 清除所有标志位
+  // 启动RTC
+  data[0] = PCF8563_CONTROL_STATUS1;
+  data[1] = 0x00;  //
   HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, data, 2, 100);
 }
 
@@ -48,6 +51,7 @@ uint8_t DEC2BCD(uint8_t dec)
   return ((dec / 10) << 4) + (dec % 10);
 }
 
+
 void PCF8563_GetDateTime(DateTime *dt)
 {
   uint8_t data[7];
@@ -71,8 +75,13 @@ void PCF8563_GetDateTime(DateTime *dt)
 void PCF8563_SetDateTime(DateTime *dt)
 {
   uint8_t data[8];
+  uint8_t ctrl[2];
+  // 停止RTC
+  ctrl[0] = PCF8563_CONTROL_STATUS1;
+  ctrl[1] = 0x01;              // bit0 = 1 停止计数
+  HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, ctrl, 2, 100);
 
-  data[0] = PCF8563_SECONDS;  // 起始寄存器地址
+  data[0] = PCF8563_SECONDS;
   data[1] = DEC2BCD(dt->second) & 0x7F;;
   data[2] = DEC2BCD(dt->minute);
   data[3] = DEC2BCD(dt->hour);
@@ -81,8 +90,15 @@ void PCF8563_SetDateTime(DateTime *dt)
   data[6] = DEC2BCD(dt->month) & 0x1F;
   data[7] = DEC2BCD(dt->year);
 
+  // 确保24小时制：清除小时寄存器的高2位 (bit7=0, bit6=0)
+  data[3] &= 0x3F;
+
   /* 写入数据到PCF8563 */
   HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, data, 8, 100);
+
+  // 启动RTC
+  ctrl[1] = 0x00;              // bit0 = 0 恢复计数
+  HAL_I2C_Master_Transmit(&hi2c2, PCF8563_ADDR, ctrl, 2, 100);
 }
 
 #endif /* USER_PCF8563_C_ */

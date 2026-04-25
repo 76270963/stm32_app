@@ -135,7 +135,7 @@ uint32_t Log_GetTotalAll(void)
     return (g_log_write_idx - g_log_start_idx + LOG_MAX_COUNT) % LOG_MAX_COUNT;
 }
 
-// 全量读取指定块（块索引从0开始，每块最多64条），返回实际读取的条数
+// 全量读取指定块（块索引从0开始，每块最多64条），
 uint32_t Log_ReadAllBlock(uint32_t block_idx, uint8_t *buf)
 {
     uint32_t total = Log_GetTotalAll();
