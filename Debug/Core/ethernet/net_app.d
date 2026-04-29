@@ -40,12 +40,11 @@ Core/ethernet/net_app.o: ../Core/ethernet/net_app.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_tim_ex.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart_ex.h \
- ../Core/user/usart.h ../Core/user/w25q128.h ../Core/user/pcf8563.h \
- ../Core/user/user.h ../Core/user/access.h ../Core/user/wiegand.h \
- ../Core/ethernet/w5500_hal.h ../Core/ethernet/net_app.h \
- ../Core/ethernet/net_services.h ../Core/ethernet/wizchip_conf.h \
+ ../Core/user/user.h ../Core/ethernet/wizchip_conf.h \
  ../Core/ethernet/W5500/w5500.h ../Core/ethernet/wizchip_conf.h \
- ../Core/ethernet/socket.h ../Core/user/log.h ../Core/user/pcf8563.h
+ ../Core/ethernet/net_services.h ../Core/user/w25q128.h \
+ ../Core/ethernet/socket.h ../Core/user/access.h ../Core/user/log.h \
+ ../Core/user/pcf8563.h
 ../Core/ethernet/net_app.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
@@ -88,18 +87,13 @@ Core/ethernet/net_app.o: ../Core/ethernet/net_app.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_tim_ex.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart_ex.h:
-../Core/user/usart.h:
-../Core/user/w25q128.h:
-../Core/user/pcf8563.h:
 ../Core/user/user.h:
-../Core/user/access.h:
-../Core/user/wiegand.h:
-../Core/ethernet/w5500_hal.h:
-../Core/ethernet/net_app.h:
-../Core/ethernet/net_services.h:
 ../Core/ethernet/wizchip_conf.h:
 ../Core/ethernet/W5500/w5500.h:
 ../Core/ethernet/wizchip_conf.h:
+../Core/ethernet/net_services.h:
+../Core/user/w25q128.h:
 ../Core/ethernet/socket.h:
+../Core/user/access.h:
 ../Core/user/log.h:
 ../Core/user/pcf8563.h:

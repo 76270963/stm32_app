@@ -7,6 +7,8 @@
 
 
 #include "log.h"
+#include "w25q128.h"
+#include "user.h"
 
 
 // 日志环形缓冲区变量

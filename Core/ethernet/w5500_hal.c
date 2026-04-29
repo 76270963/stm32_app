@@ -7,6 +7,7 @@
 
 #include "w5500_hal.h"
 #include "wizchip_conf.h"
+#include "user.h"
 
 // 自定义临界区函数（不在库中定义，而是注册用）
 static void my_cris_enter(void)

@@ -11,6 +11,11 @@
 #include "main.h"
 
 
+typedef enum {
+    DOOR_ENTRY = 0,
+    DOOR_EXIT  = 1
+} DoorDir;
+
 // ==================== 事件代码定义（完整版 1-86） ====================
 
 // 网络与电源事件 (1-8)
@@ -180,6 +185,8 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value);
 
 // 定时器回调（建议每10ms调用一次，用于超时管理）
 void WiegandAccess_TimerTick(void);
+
+void remote_confirm_unlock(uint8_t door_num, uint8_t unlock_cmd, uint16_t delay);
 
 
 #endif /* USER_ACCESS_H_ */

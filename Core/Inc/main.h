@@ -36,16 +36,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "usart.h"
-#include "w25q128.h"
-#include "pcf8563.h"
-#include "user.h"
-
-#include "access.h"
-#include "wiegand.h"
-#include "w5500_hal.h"
-#include "net_app.h"
-#include "net_services.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -6,27 +6,25 @@
  */
 
 #include "access.h"
-
-
-typedef enum {
-    DOOR_ENTRY = 0,
-    DOOR_EXIT  = 1
-} DoorDir;
-
+#include "pcf8563.h"
+#include "user.h"
+#include "w25q128.h"
+#include "net_app.h"
 
 typedef struct {
-    bool active;
-    bool waiting_for_pwd;       // 是否正在等待某张卡的密码
-    uint8_t reader_id;
-    uint8_t door_idx;
-    DoorDir dir;
-    uint8_t required_cards;
-    uint8_t current_cards;
-    uint32_t card_ids[5];
-    uint32_t pending_card;      // 当前需要验证密码的卡号
-    uint32_t timeout_ms;
-    char pwd_buf[9];            // 临时存储输入的密码
-    uint8_t pwd_len;
+	bool active;
+	bool waiting_for_pwd;
+	uint8_t reader_id;
+	uint8_t door_idx;
+	DoorDir dir;
+	uint8_t required_cards;
+	uint8_t current_cards;
+	uint32_t card_ids[5];
+	uint16_t user_uids[5];
+	uint32_t pending_card;
+	uint32_t timeout_ms;
+	char pwd_buf[9];
+	uint8_t pwd_len;
 } MultiCardState;
 
 typedef struct {
@@ -50,11 +48,30 @@ typedef struct {
 } KeyCollectState;
 
 
+typedef struct {
+    bool active;
+    uint8_t reader_id;
+    uint8_t door_idx;
+    DoorDir dir;
+    uint8_t card_count;
+    uint8_t current_cards;
+    uint32_t card_numbers[5];
+    uint16_t user_uids[5];
+    uint32_t timeout_ms;
+} RemoteConfirmState;
+
+static RemoteConfirmState g_remote_confirm = {0};
+
+
 static MultiCardState g_multi_state[4][2];
 static PasswordWaitState g_pwd_state[4][2];
 static KeyCollectState g_key_state[4][2];
 static bool g_first_card_flag[4][2];
 static uint16_t g_last_date = 0;
+
+
+
+
 
 
 static void GetCurrentDateTime(uint16_t *year, uint8_t *month, uint8_t *day,
@@ -380,17 +397,35 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 				report_event(EVENT_ANTI_PASSBACK_EXIT, point, card_number, user_uid);
 				return;
 			}
-        	report_event(EVENT_SINGLE_CARD, point, card_number, user_uid);  //单卡开门
-            if (need_remote)
+            if (need_remote) //远程请求开门
             {
+            	g_remote_confirm.active = true;
+				g_remote_confirm.reader_id = reader_id;
+				g_remote_confirm.door_idx = door_idx;
+				g_remote_confirm.dir = dir;
+				g_remote_confirm.card_count = 1;
+				g_remote_confirm.current_cards = 1;
+				g_remote_confirm.card_numbers[0] = card_number;
+				g_remote_confirm.user_uids[0] = user_uid;
+				g_remote_confirm.timeout_ms = sys_door.door[door_idx][dir].remote_confirm_delay * 1000;
+				report_event(EVENT_REMOTE_VERIFY_UNLOCK,point, card_number, user_uid);
+				//远程确认开锁
+				send_remote_confirm_request(reader_id, door_idx, dir, 1, g_remote_confirm.card_numbers, g_remote_confirm.user_uids);
                 printf("Request remote confirm for card %08X\r\n", (unsigned int)card_number);
             }
-            DoUnlock(reader_id, door_idx, dir, 1, false);
+            else
+            {
+            	report_event(EVENT_SINGLE_CARD, point, card_number, user_uid);  //单卡开门
+            	DoUnlock(reader_id, door_idx, dir, 1, false);
+            }
         }
     }
     else if (open_mode >= 2 && open_mode <= 5)
     {
 		MultiCardState *state = &g_multi_state[door_idx][dir];
+		// 如果已经完成了所需张数（等待远程确认或开锁中），拒绝多余刷卡
+		if (state->active && state->current_cards == state->required_cards)
+		    return;
 
 		if (state->active) // 去重检查
 		{
@@ -444,6 +479,9 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 			uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 0 : 1);
 			report_event(EVENT_WAIT_PWD, point, card_number, user_uid);
 
+			state->card_ids[card_seq-1] = card_number;    // 存储卡号
+			state->user_uids[card_seq-1] = user_uid;      // 存储用户UID
+
 			state->waiting_for_pwd = true;
 			state->pending_card = card_number;
 			state->pwd_len = 0;
@@ -460,7 +498,54 @@ static void ProcessValidCard(uint8_t reader_id, uint8_t door_idx, DoorDir dir, u
 				report_event(EVENT_ANTI_PASSBACK_EXIT, point, card_number, user_uid);
 				return;
 			}
-			AddCardToMulti(door_idx, dir, card_number, user_uid);
+			state->card_ids[state->current_cards] = card_number;
+			state->user_uids[state->current_cards] = user_uid;
+			state->current_cards++;
+
+			if (state->current_cards == state->required_cards)
+			{
+				// 最后一张卡：获取 need_remote 标志
+				// 需要从当前卡的 user_buf 中解析门权限
+				uint8_t *perm = user_buf + 10;
+				uint16_t door_perm;
+				if (dir == DOOR_ENTRY)
+					door_perm = *(uint16_t*)(perm + door_idx * 4 + 2);
+				else
+					door_perm = *(uint16_t*)(perm + door_idx * 4);
+				uint8_t perm_byte2 = (door_perm >> 8) & 0xFF;
+				bool need_remote = (perm_byte2 >> 5) & 0x01;
+
+				if (need_remote)
+				{
+					// 需要远程确认：构造远程确认请求
+					for (int i = 0; i < state->required_cards; i++)
+					{
+						g_remote_confirm.card_numbers[i] = state->card_ids[i];
+						g_remote_confirm.user_uids[i] = state->user_uids[i];
+					}
+					g_remote_confirm.active = true;
+					g_remote_confirm.reader_id = reader_id;
+					g_remote_confirm.door_idx = door_idx;
+					g_remote_confirm.dir = dir;
+					g_remote_confirm.card_count = state->required_cards;
+					g_remote_confirm.timeout_ms = sys_door.door[door_idx][dir].remote_confirm_delay * 1000;
+					report_event(EVENT_REMOTE_VERIFY_UNLOCK, point, card_number, user_uid);
+					send_remote_confirm_request(reader_id, door_idx, dir, state->required_cards,
+												g_remote_confirm.card_numbers, g_remote_confirm.user_uids);
+					printf("Multi-card waiting remote confirm\n");
+					// 不清除多卡状态，等待远程确认命令
+				}
+				else
+				{
+					// 不需要远程确认，直接开门
+					AddCardToMulti(door_idx, dir, card_number, user_uid);
+				}
+			}
+			else
+			{
+				// 非最后一张卡，重置超时
+				state->timeout_ms = MULTI_CARD_TIMEOUT_MS;
+			}
 		}
 	}
 }
@@ -605,116 +690,225 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
     if (key_value == 0x0B) {
         bool handled = false;
 
-        // 多卡密码等待
-        if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id && multi_state->pwd_len > 0) {
-            uint8_t user_buf[26];
-            uint32_t uid = FindUserByCard(multi_state->pending_card, user_buf);
-            if (uid != 0) {
-                uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
-                uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
-                bool is_last = (multi_state->current_cards + 1 == multi_state->required_cards);
-                uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 1 : 0);
-                if (VerifyPassword(stored_pwd, multi_state->pwd_buf)) {
-                    if (!AntiPassbackCheck(door_idx, dir, user_uid)) {
-                        report_event(EVENT_ANTI_PASSBACK_EXIT, point, multi_state->pending_card, user_uid);
-                        ClearMultiState(door_idx, dir);
-                        handled = true;
-                        if (key_state->active) ClearKeyCollector(door_idx, dir);
-                        return;
-                    }
-                    if (is_last) {
-                        report_event(EVENT_MULTI_PWD_UNLOCK, point, multi_state->pending_card, user_uid);
-                        printf("Multi-card password correct, unlocking.\n");
-                    } else {
-                        report_event(EVENT_MULTI_PWD_OK, point, multi_state->pending_card, user_uid);
-                        printf("Multi-card password correct, waiting for next card.\n");
-                    }
-                    AddCardToMulti(door_idx, dir, multi_state->pending_card, user_uid);
-                    multi_state->waiting_for_pwd = false;
-                    multi_state->pending_card = 0;
-                    multi_state->pwd_len = 0;
-                    memset(multi_state->pwd_buf, 0, sizeof(multi_state->pwd_buf));
-                } else {
-                    printf("Multi-card password error, aborting multi-card process.\n");
-                    report_event(EVENT_PWD_ERROR, point, multi_state->pending_card, user_uid);
-                    ClearMultiState(door_idx, dir);
-                }
-            } else {
-                ClearMultiState(door_idx, dir);
-            }
-            handled = true;
-            if (key_state->active) ClearKeyCollector(door_idx, dir);
-        }
 
-        // 单卡密码等待（刷卡后的卡+密码 或 独立密码）
-        if (!handled && key_state->active && key_state->reader_id == reader_id && key_state->pwd_len > 0) {
-            if (key_state->card_number != 0) {
-                // 普通卡+密码验证
-                uint8_t user_buf[26];
-                uint32_t uid = FindUserByCard(key_state->card_number, user_buf);
-                if (uid != 0) {
-                    uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
-                    uint8_t point = key_state->door_idx * 2 + (key_state->dir == DOOR_ENTRY ? 1 : 0);
-                    uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
-                    if (VerifyPassword(stored_pwd, key_state->pwd_buf)) {
-                    	// 反潜回检查（
-                    	if (!AntiPassbackCheck(key_state->door_idx, key_state->dir, user_uid)) {
-							report_event(EVENT_ANTI_PASSBACK_EXIT, point, key_state->card_number, user_uid);
-							ClearKeyCollector(door_idx, dir);
-							handled = true;
-							return;
+
+	// 多卡密码等待
+	if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id && multi_state->pwd_len > 0)
+	{
+		uint8_t user_buf[26];
+		uint32_t uid = FindUserByCard(multi_state->pending_card, user_buf);
+		if (uid != 0)
+		{
+			uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
+			uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
+			//bool is_last = (multi_state->current_cards + 1 == multi_state->required_cards);
+			uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 1 : 0);
+			if (VerifyPassword(stored_pwd, multi_state->pwd_buf))
+			{
+				// 反潜回检查
+				if (!AntiPassbackCheck(door_idx, dir, user_uid))
+				{
+					report_event(EVENT_ANTI_PASSBACK_EXIT, point, multi_state->pending_card, user_uid);
+					ClearMultiState(door_idx, dir);
+					handled = true;
+					if (key_state->active) ClearKeyCollector(door_idx, dir);
+					return;
+				}
+
+				// 获取当前卡的远程确认标志
+				uint8_t *perm = user_buf + 10;
+				uint16_t door_perm;
+				if (dir == DOOR_ENTRY)
+					door_perm = *(uint16_t*)(perm + door_idx * 4 + 2);
+				else
+					door_perm = *(uint16_t*)(perm + door_idx * 4);
+				uint8_t perm_byte2 = (door_perm >> 8) & 0xFF;
+				bool need_remote = (perm_byte2 >> 5) & 0x01;
+
+				// 增加当前卡计数（之前刷卡时已存储卡号和uid到数组中，但current_cards未增加）
+				multi_state->current_cards++;
+
+				if (multi_state->current_cards == multi_state->required_cards)
+				{
+					// 最后一张卡
+					if (need_remote)
+					{
+						// 需要远程确认：构造远程确认请求，不立即开门
+						for (int i = 0; i < multi_state->required_cards; i++)
+						{
+							g_remote_confirm.card_numbers[i] = multi_state->card_ids[i];
+							g_remote_confirm.user_uids[i] = multi_state->user_uids[i];
 						}
-                        printf("Event: %d (Reader%d)\n", EVENT_MULTI_PWD_UNLOCK, reader_id);
-                        report_event(EVENT_PWD_UNLOCK, point, key_state->card_number, user_uid);
-                        DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    } else {
-                        printf("Event: %d (Reader%d)\n", EVENT_PWD_ERROR, reader_id);
-                        report_event(EVENT_PWD_ERROR, point, key_state->card_number, user_uid);
-                    }
-                }
-                ClearKeyCollector(door_idx, dir);
-                handled = true;
-            } else {
-                // 独立密码验证（超级/胁迫/解除）—— 根据方向选择正确的门配置索引
-                uint32_t encoded_pwd = EncodePassword(key_state->pwd_buf);
-                uint8_t cfg_idx = (key_state->dir == DOOR_ENTRY) ? 1 : 0;
-                DoorConfig *door_cfg = &sys_door.door[key_state->door_idx][cfg_idx];
-                uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 1 : 0);
-                bool pwd_matched = false;
+						g_remote_confirm.active = true;
+						g_remote_confirm.reader_id = reader_id;
+						g_remote_confirm.door_idx = door_idx;
+						g_remote_confirm.dir = dir;
+						g_remote_confirm.card_count = multi_state->required_cards;
+						g_remote_confirm.timeout_ms = sys_door.door[door_idx][dir].remote_confirm_delay * 1000;
+						report_event(EVENT_REMOTE_VERIFY_UNLOCK, point, multi_state->pending_card, user_uid);
+						send_remote_confirm_request(reader_id, door_idx, dir, multi_state->required_cards,
+													g_remote_confirm.card_numbers, g_remote_confirm.user_uids);
+						// 清除密码等待标志，保留多卡状态
+						multi_state->waiting_for_pwd = false;
+						multi_state->pending_card = 0;
+						multi_state->pwd_len = 0;
+						memset(multi_state->pwd_buf, 0, sizeof(multi_state->pwd_buf));
+						handled = true;
+						if (key_state->active) ClearKeyCollector(door_idx, dir);
+						return;   // 等待远程确认，不继续
+					}
+					else
+					{
+						// 不需要远程确认，直接开锁
+						report_event(EVENT_MULTI_PWD_UNLOCK, point, multi_state->pending_card, user_uid);
+						printf("Multi-card password correct, unlocking.\n");
+						DoUnlock(reader_id, door_idx, dir, multi_state->required_cards, true);
+						ClearMultiState(door_idx, dir);
+					}
+				}
+				else
+				{
+					// 非最后一张卡
+					report_event(EVENT_MULTI_PWD_OK, point, multi_state->pending_card, user_uid);
+					printf("Multi-card password correct, waiting for next card.\n");
+					// 清除密码等待标志，继续等待下一张卡
+					multi_state->waiting_for_pwd = false;
+					multi_state->pending_card = 0;
+					multi_state->pwd_len = 0;
+					memset(multi_state->pwd_buf, 0, sizeof(multi_state->pwd_buf));
+				}
+				handled = true;
+				if (key_state->active) ClearKeyCollector(door_idx, dir);
+			}
+			else
+			{
+				printf("Multi-card password error, aborting multi-card process.\n");
+				report_event(EVENT_PWD_ERROR, point, multi_state->pending_card, user_uid);
+				ClearMultiState(door_idx, dir);
+				handled = true;
+				if (key_state->active) ClearKeyCollector(door_idx, dir);
+			}
+		}
+		else
+		{
+			ClearMultiState(door_idx, dir);
+			handled = true;
+			if (key_state->active) ClearKeyCollector(door_idx, dir);
+		}
+	}
 
-                if (encoded_pwd == door_cfg->master_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_MASTER_PWD_UNLOCK, reader_id);
-                    report_event(EVENT_MASTER_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                } else if (encoded_pwd == door_cfg->duress_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_DURESS_PWD_UNLOCK, reader_id);
-                    report_event(EVENT_DURESS_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                } else if (encoded_pwd == door_cfg->release_password) {
-                    printf("Event: %d (Reader%d)\n", EVENT_RELEASE_PWD_UNLOCK, reader_id);
-                    report_event(EVENT_RELEASE_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
-                    DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
-                    pwd_matched = true;
-                }
-                if (!pwd_matched) {
-                    printf("Event: %d (Reader%d) - invalid independent password\n", EVENT_PWD_ERROR, reader_id);
-                    report_event(EVENT_PWD_ERROR, point, 0xFFFFFFFF, 0xFFFF);
-                }
-                ClearKeyCollector(door_idx, dir);
-                handled = true;
-            }
-        }
 
-        if (!handled) {
-            printf("Password input without active wait, ignored.\n");
-        }
-        return;
-    }
+	// 单卡密码等待（刷卡后的卡+密码 或 独立密码）
+	if (!handled && key_state->active && key_state->reader_id == reader_id && key_state->pwd_len > 0)
+	{
+		if (key_state->card_number != 0)
+		{
+			// 普通卡+密码验证
+			uint8_t user_buf[26];
+			uint32_t uid = FindUserByCard(key_state->card_number, user_buf);
+			if (uid != 0)
+			{
+				uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);
+				uint8_t point = key_state->door_idx * 2 + (key_state->dir == DOOR_ENTRY ? 1 : 0);
+				uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
+				if (VerifyPassword(stored_pwd, key_state->pwd_buf))
+				{
+					// 反潜回检查（
+					if (!AntiPassbackCheck(key_state->door_idx, key_state->dir, user_uid))
+					{
+						report_event(EVENT_ANTI_PASSBACK_EXIT, point, key_state->card_number, user_uid);
+						ClearKeyCollector(door_idx, dir);
+						handled = true;
+						return;
+					}
 
-    // 处理数字键 0-9
-    if (key_value >= 0 && key_value <= 9) {
+					uint8_t *perm = user_buf + 10;
+					uint16_t door_perm;
+					if (key_state->dir == DOOR_ENTRY)
+						door_perm = *(uint16_t*)(perm + key_state->door_idx * 4 + 2);
+					else
+						door_perm = *(uint16_t*)(perm + key_state->door_idx * 4);
+					uint8_t perm_byte2 = (door_perm >> 8) & 0xFF;
+					bool need_remote = (perm_byte2 >> 5) & 0x01;
+
+					if (need_remote) // 进入远程确认等待
+					{
+						g_remote_confirm.active = true;
+						g_remote_confirm.reader_id = reader_id;
+						g_remote_confirm.door_idx = key_state->door_idx;
+						g_remote_confirm.dir = key_state->dir;
+						g_remote_confirm.card_count = 1;
+						g_remote_confirm.current_cards = 1;
+						g_remote_confirm.card_numbers[0] = key_state->card_number;
+						g_remote_confirm.user_uids[0] = user_uid;
+						g_remote_confirm.timeout_ms = sys_door.door[key_state->door_idx][key_state->dir].remote_confirm_delay * 1000;
+						report_event(EVENT_REMOTE_VERIFY_UNLOCK,point,  key_state->card_number, user_uid);
+						//远程确认开锁
+						send_remote_confirm_request(reader_id, key_state->door_idx, key_state->dir, 1,
+													g_remote_confirm.card_numbers, g_remote_confirm.user_uids);
+
+						printf("Request remote confirm for card %08X\r\n", (unsigned int)key_state->card_number);
+					}
+					else
+					{
+						printf("Event: %d (Reader%d)\n", EVENT_MULTI_PWD_UNLOCK, reader_id);
+						report_event(EVENT_PWD_UNLOCK, point, key_state->card_number, user_uid);
+						DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+					}
+				}
+				else
+				{
+					printf("Event: %d (Reader%d)\n", EVENT_PWD_ERROR, reader_id);
+					report_event(EVENT_PWD_ERROR, point, key_state->card_number, user_uid);
+				}
+			}
+			ClearKeyCollector(door_idx, dir);
+			handled = true;
+		}
+		else
+		{
+			// 独立密码验证（超级/胁迫/解除）—— 根据方向选择正确的门配置索引
+			uint32_t encoded_pwd = EncodePassword(key_state->pwd_buf);
+			uint8_t cfg_idx = (key_state->dir == DOOR_ENTRY) ? 1 : 0;
+			DoorConfig *door_cfg = &sys_door.door[key_state->door_idx][cfg_idx];
+			uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 1 : 0);
+			bool pwd_matched = false;
+
+			if (encoded_pwd == door_cfg->master_password) {
+				printf("Event: %d (Reader%d)\n", EVENT_MASTER_PWD_UNLOCK, reader_id);
+				report_event(EVENT_MASTER_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+				DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+				pwd_matched = true;
+			} else if (encoded_pwd == door_cfg->duress_password) {
+				printf("Event: %d (Reader%d)\n", EVENT_DURESS_PWD_UNLOCK, reader_id);
+				report_event(EVENT_DURESS_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+				DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+				pwd_matched = true;
+			} else if (encoded_pwd == door_cfg->release_password) {
+				printf("Event: %d (Reader%d)\n", EVENT_RELEASE_PWD_UNLOCK, reader_id);
+				report_event(EVENT_RELEASE_PWD_UNLOCK, point, 0xFFFFFFFF, 0xFFFF);
+				DoUnlock(reader_id, key_state->door_idx, key_state->dir, 1, true);
+				pwd_matched = true;
+			}
+			if (!pwd_matched) {
+				printf("Event: %d (Reader%d) - invalid independent password\n", EVENT_PWD_ERROR, reader_id);
+				report_event(EVENT_PWD_ERROR, point, 0xFFFFFFFF, 0xFFFF);
+			}
+			ClearKeyCollector(door_idx, dir);
+			handled = true;
+		}
+	}
+
+		if (!handled)
+		{
+			printf("Password input without active wait, ignored.\n");
+		}
+		return;
+	}
+
+	// 处理数字键 0-9
+	if (key_value >= 0 && key_value <= 9)
+	{
         if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id) {
             if (multi_state->pwd_len < 8) {
                 multi_state->pwd_buf[multi_state->pwd_len++] = '0' + key_value;
@@ -764,37 +958,97 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
 }
 
 
+
+
 void WiegandAccess_TimerTick(void)
 {
-    // 每10ms调用，递减各超时计数器
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 2; j++) {
-            if (g_multi_state[i][j].active) {
-                if (g_multi_state[i][j].timeout_ms <= 10) ClearMultiState(i, j);
-                else g_multi_state[i][j].timeout_ms -= 10;
-            }
-            if (g_pwd_state[i][j].active) {
-                if (g_pwd_state[i][j].timeout_ms <= 10) ClearPwdState(i, j);
-                else g_pwd_state[i][j].timeout_ms -= 10;
-            }
-            if (g_key_state[i][j].active) {
-                if (g_key_state[i][j].timeout_ms <= 10) ClearKeyCollector(i, j);
-                else g_key_state[i][j].timeout_ms -= 10;
-            }
-        }
+	// 每10ms调用，递减各超时计数器
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			if (g_multi_state[i][j].active)
+			{
+				if (g_multi_state[i][j].timeout_ms <= 10) ClearMultiState(i, j);
+				else g_multi_state[i][j].timeout_ms -= 10;
+			}
+			if (g_pwd_state[i][j].active)
+			{
+				if (g_pwd_state[i][j].timeout_ms <= 10) ClearPwdState(i, j);
+				else g_pwd_state[i][j].timeout_ms -= 10;
+			}
+			if (g_key_state[i][j].active)
+			{
+				if (g_key_state[i][j].timeout_ms <= 10) ClearKeyCollector(i, j);
+				else g_key_state[i][j].timeout_ms -= 10;
+			}
+		}
+	}
+
+	// 新增：远程确认超时处理
+	if (g_remote_confirm.active)
+	{
+		if (g_remote_confirm.timeout_ms <= 10)
+		{
+			ClearMultiState(g_remote_confirm.door_idx, g_remote_confirm.dir);
+			g_remote_confirm.active = false;
+		}
+		else
+		{
+			g_remote_confirm.timeout_ms -= 10;
+		}
+	}
+
+	// 首卡标志每日清零
+	uint16_t year;
+	uint8_t month, day, hour, minute, second, weekday;
+	GetCurrentDateTime(&year, &month, &day, &hour, &minute, &second, &weekday);
+	uint16_t today = (uint16_t)((year << 9) | (month << 5) | day);
+	if (g_last_date != today && hour == 0 && minute == 0)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 2; j++)
+			{
+				g_first_card_flag[i][j] = false;
+			}
+		}
+		g_last_date = today;
+	}
+}
+
+
+
+// 处理远程确认开锁命令
+void remote_confirm_unlock(uint8_t door_num, uint8_t unlock_cmd, uint16_t delay)
+{
+    (void)delay; // 延时可根据需要控制硬件开锁信号时长，此处暂忽略
+    if (!g_remote_confirm.active) {
+        printf("Remote confirm: no pending request\n");
+        return;
+    }
+    // 检查门编号是否匹配（door_num 是 1-based，g_remote_confirm.door_idx 是 0-based）
+    if (door_num != g_remote_confirm.door_idx + 1) {
+        printf("Remote confirm: door mismatch (%d != %d)\n", door_num, g_remote_confirm.door_idx+1);
+        return;
+    }
+    if (unlock_cmd != 1) {
+        printf("Remote confirm: unlock_cmd not 1\n");
+        return;
     }
 
-    // 首卡标志每日清零
-    uint16_t year;
-    uint8_t month, day, hour, minute, second, weekday;
-    GetCurrentDateTime(&year, &month, &day, &hour, &minute, &second, &weekday);
-    uint16_t today = (uint16_t)((year << 9) | (month << 5) | day);
-    if (g_last_date != today && hour == 0 && minute == 0) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 2; j++) {
-                g_first_card_flag[i][j] = false;
-            }
-        }
-        g_last_date = today;
-    }
+    // 执行开门
+    uint8_t point = g_remote_confirm.door_idx * 2 + (g_remote_confirm.dir == DOOR_ENTRY ? 1 : 0);
+   // uint8_t event = EVENT_SINGLE_UNLOCK + (g_remote_confirm.card_count - 1);
+    report_event(EVENT_REMOTE_NORMAL_UNLOCK, point, 0xffffffff,0xffff);
+
+    DoUnlock(g_remote_confirm.reader_id, g_remote_confirm.door_idx, g_remote_confirm.dir,
+             g_remote_confirm.card_count, false);
+
+    // 清除多卡组合状态（如果存在）
+    ClearMultiState(g_remote_confirm.door_idx, g_remote_confirm.dir);
+    // 清除远程确认标志
+    g_remote_confirm.active = false;
+    printf("Remote confirm: unlocked\n");
 }
+

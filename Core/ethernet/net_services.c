@@ -7,8 +7,13 @@
 
 
 #include "net_services.h"
+#include "access.h"
 #include "wizchip_conf.h"
 #include "socket.h"
+#include "user.h"
+#include "w5500_hal.h"
+#include "net_app.h"
+
 
 static uint8_t tcp_rx_buf[TCP_RX_BUF_SIZE];
 

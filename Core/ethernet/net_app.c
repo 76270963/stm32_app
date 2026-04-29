@@ -6,9 +6,7 @@
  */
 
 #include "net_app.h"
-#include "wizchip_conf.h"
-#include "socket.h"
-#include "log.h"
+
 
 uint16_t BlockCount;
 
@@ -161,16 +159,7 @@ void SetTime(const uint8_t *req_buf)
 	dt.second = req_buf[15];
 	uint16_t real_year = 2000 + dt.year;
 	dt.weekday = calculate_weekday(real_year, dt.month, dt.day);
-
 	PCF8563_SetDateTime(&dt);
-	printf("set time: %04d-%02d-%02d %02d:%02d:%02d, weekday = %d\r\n",
-				dt.year + 2000,
-				dt.month,
-				dt.day,
-				dt.hour,
-				dt.minute,
-				dt.second,
-				dt.weekday);
 }
 
 
@@ -394,6 +383,27 @@ void handle_write_door(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
     reply_send(rb, socket);
 }
 
+// 远程确认开锁回复
+void handle_remote_lock(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
+{
+	uint8_t door_num = req_buf[10];   // 门编号 1-4
+	uint8_t unlock_cmd = req_buf[11]; // 0关1开
+	uint16_t delay = req_buf[12] | (req_buf[13] << 8); // 开锁延时（秒）
+
+	// 回复确认
+	reply_add_byte(rb, door_num);
+	reply_add_byte(rb, unlock_cmd);
+	reply_add_byte(rb, req_buf[12]);
+	reply_add_byte(rb, req_buf[13]);
+	rb->data_len = 4;
+	reply_send(rb, socket);
+
+	// 处理远程确认开锁
+	if (unlock_cmd == 1)
+	{
+		remote_confirm_unlock(door_num, unlock_cmd, delay);
+	}
+}
 
 // 读取系统时间
 void handle_read_times(ReplyBuilder *rb, uint8_t socket)
@@ -720,6 +730,10 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 					else if(CMD2 == 0x05) handle_system_Reset(&rb, socket);
 					break;
 
+				case 0x08://远程开锁
+					if(CMD2 == 0x09) handle_remote_lock(&rb, buf, socket);
+					break;
+
 				case 0x09://时间
 					if(CMD2 == 0x01) handle_read_times(&rb, socket);
 					else if (CMD2 == 0x02) handle_write_times(&rb, buf, socket);
@@ -894,3 +908,57 @@ void report_event(uint8_t event_type, uint8_t point, uint32_t card_number, uint1
 
     Log_Write(event_type, point, card_number, uid, &dt);
 }
+
+
+
+// 发送远程确认开锁请求
+void send_remote_confirm_request(uint8_t reader_id, uint8_t door_idx, DoorDir dir,
+                                 uint8_t card_count, uint32_t *card_numbers, uint16_t *user_uids)
+{
+    if (!is_tcp_connected()) return;
+
+    uint8_t buf[64];
+    uint8_t idx = 0;
+    uint8_t dev_uid[4];
+    read_stm32_uid(dev_uid);
+    buf[idx++] = 0x53;
+    memcpy(&buf[idx], dev_uid, 4);
+    idx += 4;
+    buf[idx++] = DOOR_TYPE;
+    // 数据域长度占位
+    uint16_t data_len_pos = idx;
+    buf[idx++] = 0x00;
+    buf[idx++] = 0x00;
+    buf[idx++] = 0x0F;  // CMD1
+    buf[idx++] = 0x00;  // CMD2
+    // 点位
+    uint8_t point = door_idx * 2 + (dir == DOOR_ENTRY ? 1 : 0);
+    buf[idx++] = point;
+    // 组合卡数量
+    buf[idx++] = card_count;
+    // 发送每张卡的ID和卡号
+    for (int i = 0; i < 5; i++) {
+        if (i < card_count) {
+            buf[idx++] = user_uids[i] & 0xFF;
+            buf[idx++] = (user_uids[i] >> 8) & 0xFF;
+            buf[idx++] = card_numbers[i] & 0xFF;
+            buf[idx++] = (card_numbers[i] >> 8) & 0xFF;
+            buf[idx++] = (card_numbers[i] >> 16) & 0xFF;
+            buf[idx++] = (card_numbers[i] >> 24) & 0xFF;
+        } else {
+            for (int j=0; j<6; j++) buf[idx++] = 0x00;
+        }
+    }
+    uint16_t data_len = idx -(data_len_pos + 4);
+    buf[data_len_pos] = data_len & 0xFF;
+    buf[data_len_pos+1] = (data_len >> 8) & 0xFF;
+    xor_encrypt(buf, idx);
+    uint8_t crc_val = crc(buf, idx);
+    buf[idx++] = crc_val;
+    if (send(TCP_SOCKET, buf, idx) <= 0) {
+        printf("Remote confirm request send failed\n");
+    } else {
+        printf("Remote confirm request sent\n");
+    }
+}
+
