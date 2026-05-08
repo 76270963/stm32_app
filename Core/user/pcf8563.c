@@ -76,6 +76,7 @@ void PCF8563_SetDateTime(DateTime *dt)
 {
   uint8_t data[8];
   uint8_t ctrl[2];
+
   // 停止RTC
   ctrl[0] = PCF8563_CONTROL_STATUS1;
   ctrl[1] = 0x01;              // bit0 = 1 停止计数

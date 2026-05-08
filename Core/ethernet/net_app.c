@@ -157,6 +157,7 @@ void SetTime(const uint8_t *req_buf)
 	dt.hour   = req_buf[13];
 	dt.minute = req_buf[14];
 	dt.second = req_buf[15];
+
 	uint16_t real_year = 2000 + dt.year;
 	dt.weekday = calculate_weekday(real_year, dt.month, dt.day);
 	PCF8563_SetDateTime(&dt);

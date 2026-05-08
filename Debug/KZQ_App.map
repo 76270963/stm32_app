@@ -215,6 +215,8 @@ Discarded input sections
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
+ .group         0x00000000        0xc ./Core/Src/main.o
+ .group         0x00000000        0xc ./Core/Src/main.o
  .text          0x00000000        0x0 ./Core/Src/main.o
  .data          0x00000000        0x0 ./Core/Src/main.o
  .bss           0x00000000        0x0 ./Core/Src/main.o
@@ -971,9 +973,11 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 ./Core/ethernet/net_app.o
  .debug_macro   0x00000000       0x29 ./Core/ethernet/net_app.o
  .debug_macro   0x00000000       0xfa ./Core/ethernet/net_app.o
+ .debug_macro   0x00000000       0x8e ./Core/ethernet/net_app.o
  .debug_macro   0x00000000       0x85 ./Core/ethernet/net_app.o
  .debug_macro   0x00000000      0x5fc ./Core/ethernet/net_app.o
  .debug_macro   0x00000000       0x66 ./Core/ethernet/net_app.o
+ .debug_macro   0x00000000       0x1c ./Core/ethernet/net_app.o
  .group         0x00000000        0xc ./Core/ethernet/net_services.o
  .group         0x00000000        0xc ./Core/ethernet/net_services.o
  .group         0x00000000        0xc ./Core/ethernet/net_services.o
@@ -7590,7 +7594,7 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
 .iplt           0x08012fb4        0x0
  .iplt          0x08012fb4        0x0 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.rodata         0x08012fb4      0xb6c
+.rodata         0x08012fb4      0xb78
                 0x08012fb4                        . = ALIGN (0x4)
  *(.rodata)
  .rodata        0x08012fb4        0xb ./Core/ethernet/net_services.o
@@ -7599,105 +7603,106 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
  .rodata        0x08012fcc       0x7c E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp\libgcc.a(divsf3.o)
  *(.rodata*)
  .rodata.main.str1.1
-                0x08013048      0xa48 ./Core/Src/main.o
-                                 0x33 (size before relaxing)
+                0x08013048      0xa53 ./Core/Src/main.o
+                                 0x3e (size before relaxing)
+ *fill*         0x08013a9b        0x1 
  .rodata.APBPrescTable
-                0x08013a90       0x20 ./Core/Src/system_stm32g0xx.o
-                0x08013a90                APBPrescTable
+                0x08013a9c       0x20 ./Core/Src/system_stm32g0xx.o
+                0x08013a9c                APBPrescTable
  .rodata.AHBPrescTable
-                0x08013ab0       0x40 ./Core/Src/system_stm32g0xx.o
-                0x08013ab0                AHBPrescTable
+                0x08013abc       0x40 ./Core/Src/system_stm32g0xx.o
+                0x08013abc                AHBPrescTable
  .rodata.pack_device_info.part.0.str1.1
-                0x08013af0        0xa ./Core/ethernet/net_app.o
+                0x08013afc        0xa ./Core/ethernet/net_app.o
  .rodata.write_sys_parameters.str1.1
-                0x08013af0       0x2a ./Core/ethernet/net_app.o
+                0x08013afc       0x2a ./Core/ethernet/net_app.o
  .rodata.parse_tcp_data.str1.1
-                0x08013af0       0x57 ./Core/ethernet/net_app.o
+                0x08013afc       0x57 ./Core/ethernet/net_app.o
  .rodata.pack_heartbeat_data.str1.1
-                0x08013af0       0x3e ./Core/ethernet/net_app.o
+                0x08013afc       0x3e ./Core/ethernet/net_app.o
  .rodata.report_event.str1.1
-                0x08013af0       0x3b ./Core/ethernet/net_app.o
+                0x08013afc       0x3b ./Core/ethernet/net_app.o
  .rodata.send_remote_confirm_request.str1.1
-                0x08013af0       0x3f ./Core/ethernet/net_app.o
+                0x08013afc       0x3f ./Core/ethernet/net_app.o
  .rodata.network_reinit.str1.1
-                0x08013af0       0x9c ./Core/ethernet/net_services.o
+                0x08013afc       0x9c ./Core/ethernet/net_services.o
  .rodata.network_init.str1.1
-                0x08013af0       0x1a ./Core/ethernet/net_services.o
+                0x08013afc       0x1a ./Core/ethernet/net_services.o
  .rodata.network_process.str1.1
-                0x08013af0      0x140 ./Core/ethernet/net_services.o
+                0x08013afc      0x140 ./Core/ethernet/net_services.o
  .rodata.print_network_information.str1.1
-                0x08013af0      0x154 ./Core/ethernet/w5500_hal.o
+                0x08013afc      0x154 ./Core/ethernet/w5500_hal.o
  .rodata.W5500_Init_HAL.str1.1
-                0x08013af0        0x9 ./Core/ethernet/w5500_hal.o
+                0x08013afc        0x9 ./Core/ethernet/w5500_hal.o
  .rodata.WiegandAccess_ProcessCard.str1.1
-                0x08013af0      0x204 ./Core/user/access.o
+                0x08013afc      0x204 ./Core/user/access.o
  .rodata.WiegandAccess_ProcessKey.str1.1
-                0x08013af0      0x217 ./Core/user/access.o
+                0x08013afc      0x217 ./Core/user/access.o
  .rodata.remote_confirm_unlock.str1.1
-                0x08013af0       0x87 ./Core/user/access.o
+                0x08013afc       0x87 ./Core/user/access.o
  .rodata.CSWTCH.39
-                0x08013af0        0x3 ./Core/user/access.o
+                0x08013afc        0x3 ./Core/user/access.o
  .rodata.CSWTCH.38
-                0x08013af3        0x3 ./Core/user/access.o
+                0x08013aff        0x3 ./Core/user/access.o
  .rodata.WiegandDecode.str1.1
-                0x08013af6       0xdc ./Core/user/wiegand.o
+                0x08013b02       0xdc ./Core/user/wiegand.o
  .rodata.UARTPrescTable
-                0x08013af6       0x18 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
-                0x08013af6                UARTPrescTable
+                0x08013b02       0x18 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
+                0x08013b02                UARTPrescTable
  .rodata.denominator.0
-                0x08013b0e        0x8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+                0x08013b1a        0x8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
  .rodata.numerator.1
-                0x08013b16        0x8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+                0x08013b22        0x8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
  .rodata._vfprintf_r.str1.1
-                0x08013b1e       0x11 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf.o)
+                0x08013b2a       0x11 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf.o)
  .rodata._printf_i.str1.1
-                0x08013b1e       0x22 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
-                0x08013d08                        . = ALIGN (0x4)
- *fill*         0x08013b1e        0x2 
+                0x08013b2a       0x22 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x08013d14                        . = ALIGN (0x4)
+ *fill*         0x08013b2a        0x2 
 
-.ARM.extab      0x08013b20        0x0
-                0x08013b20                        . = ALIGN (0x4)
+.ARM.extab      0x08013b2c        0x0
+                0x08013b2c                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x08013b20                        . = ALIGN (0x4)
+                0x08013b2c                        . = ALIGN (0x4)
 
-.ARM            0x08013b20        0x8
-                0x08013b20                        . = ALIGN (0x4)
-                0x08013b20                        __exidx_start = .
+.ARM            0x08013b2c        0x8
+                0x08013b2c                        . = ALIGN (0x4)
+                0x08013b2c                        __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x08013b20        0x8 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
-                0x08013b28                        __exidx_end = .
-                0x08013b28                        . = ALIGN (0x4)
+ .ARM.exidx     0x08013b2c        0x8 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
+                0x08013b34                        __exidx_end = .
+                0x08013b34                        . = ALIGN (0x4)
 
-.preinit_array  0x08013b28        0x0
-                0x08013b28                        . = ALIGN (0x4)
-                0x08013b28                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x08013b34        0x0
+                0x08013b34                        . = ALIGN (0x4)
+                0x08013b34                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x08013b28                        PROVIDE (__preinit_array_end = .)
-                0x08013b28                        . = ALIGN (0x4)
+                0x08013b34                        PROVIDE (__preinit_array_end = .)
+                0x08013b34                        . = ALIGN (0x4)
 
-.init_array     0x08013b28        0x4
-                0x08013b28                        . = ALIGN (0x4)
-                0x08013b28                        PROVIDE (__init_array_start = .)
+.init_array     0x08013b34        0x4
+                0x08013b34                        . = ALIGN (0x4)
+                0x08013b34                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x08013b28        0x4 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
-                0x08013b2c                        PROVIDE (__init_array_end = .)
-                0x08013b2c                        . = ALIGN (0x4)
+ .init_array    0x08013b34        0x4 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
+                0x08013b38                        PROVIDE (__init_array_end = .)
+                0x08013b38                        . = ALIGN (0x4)
 
-.fini_array     0x08013b2c        0x4
-                0x08013b2c                        . = ALIGN (0x4)
+.fini_array     0x08013b38        0x4
+                0x08013b38                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x08013b2c        0x4 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
+ .fini_array    0x08013b38        0x4 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x08013b30                        . = ALIGN (0x4)
-                0x08013b30                        _sidata = LOADADDR (.data)
+                0x08013b3c                        . = ALIGN (0x4)
+                0x08013b3c                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x08013b30        0x0
- .rel.iplt      0x08013b30        0x0 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
+.rel.dyn        0x08013b3c        0x0
+ .rel.iplt      0x08013b3c        0x0 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.data           0x20000000       0x98 load address 0x08013b30
+.data           0x20000000       0x98 load address 0x08013b3c
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -7732,11 +7737,11 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
                 0x20000098                        . = ALIGN (0x4)
                 0x20000098                        _edata = .
 
-.igot.plt       0x20000098        0x0 load address 0x08013bc8
+.igot.plt       0x20000098        0x0 load address 0x08013bd4
  .igot.plt      0x20000098        0x0 E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp/crtbegin.o
                 0x20000098                        . = ALIGN (0x4)
 
-.bss            0x20000098     0x11e0 load address 0x08013bc8
+.bss            0x20000098     0x11e0 load address 0x08013bd4
                 0x20000098                        _sbss = .
                 0x20000098                        __bss_start__ = _sbss
  *(.bss)
@@ -7865,7 +7870,7 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
                 0x20001278                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x20001278      0x600 load address 0x08013bc8
+                0x20001278      0x600 load address 0x08013bd4
                 0x20001278                        . = ALIGN (0x8)
                 [!provide]                        PROVIDE (end = .)
                 0x20001278                        PROVIDE (_end = .)
@@ -8077,85 +8082,85 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
 LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libm.a
 LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v6-m/nofp\libgcc.a
 
-.debug_info     0x00000000    0x32210
- .debug_info    0x00000000     0x2cc8 ./Core/Src/main.o
- .debug_info    0x00002cc8     0x1ffd ./Core/Src/stm32g0xx_hal_msp.o
- .debug_info    0x00004cc5      0xd7b ./Core/Src/stm32g0xx_it.o
- .debug_info    0x00005a40      0x7b5 ./Core/Src/syscalls.o
- .debug_info    0x000061f5      0x186 ./Core/Src/sysmem.o
- .debug_info    0x0000637b      0x347 ./Core/Src/system_stm32g0xx.o
- .debug_info    0x000066c2       0x30 ./Core/Startup/startup_stm32g0b1vetx.o
- .debug_info    0x000066f2      0x9b1 ./Core/ethernet/W5500/w5500.o
- .debug_info    0x000070a3     0x35ee ./Core/ethernet/net_app.o
- .debug_info    0x0000a691      0xe01 ./Core/ethernet/net_services.o
- .debug_info    0x0000b492     0x1895 ./Core/ethernet/socket.o
- .debug_info    0x0000cd27     0x10ee ./Core/ethernet/w5500_hal.o
- .debug_info    0x0000de15     0x16a7 ./Core/ethernet/wizchip_conf.o
- .debug_info    0x0000f4bc     0x25ee ./Core/user/access.o
- .debug_info    0x00011aaa      0x5ac ./Core/user/log.o
- .debug_info    0x00012056      0xb26 ./Core/user/pcf8563.o
- .debug_info    0x00012b7c      0x954 ./Core/user/timApp.o
- .debug_info    0x000134d0      0xb3f ./Core/user/usart.o
- .debug_info    0x0001400f      0xf32 ./Core/user/user.o
- .debug_info    0x00014f41     0x1045 ./Core/user/w25q128.o
- .debug_info    0x00015f86      0x4e7 ./Core/user/wiegand.o
- .debug_info    0x0001646d      0xc10 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
- .debug_info    0x0001707d     0x216f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
- .debug_info    0x000191ec      0xd68 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
- .debug_info    0x00019f54      0xa6b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
- .debug_info    0x0001a9bf      0xa57 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
- .debug_info    0x0001b416      0x63a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
- .debug_info    0x0001ba50     0x3fa5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
- .debug_info    0x0001f9f5      0xa61 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
- .debug_info    0x00020456      0x25e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
- .debug_info    0x000206b4      0x951 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
- .debug_info    0x00021005      0xe7a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
- .debug_info    0x00021e7f      0xbac ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
- .debug_info    0x00022a2b     0x22bf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
- .debug_info    0x00024cea     0x426b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
- .debug_info    0x00028f55     0x1def ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
- .debug_info    0x0002ad44     0x61e8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
- .debug_info    0x00030f2c     0x12e4 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+.debug_info     0x00000000    0x321b8
+ .debug_info    0x00000000     0x2c70 ./Core/Src/main.o
+ .debug_info    0x00002c70     0x1ffd ./Core/Src/stm32g0xx_hal_msp.o
+ .debug_info    0x00004c6d      0xd7b ./Core/Src/stm32g0xx_it.o
+ .debug_info    0x000059e8      0x7b5 ./Core/Src/syscalls.o
+ .debug_info    0x0000619d      0x186 ./Core/Src/sysmem.o
+ .debug_info    0x00006323      0x347 ./Core/Src/system_stm32g0xx.o
+ .debug_info    0x0000666a       0x30 ./Core/Startup/startup_stm32g0b1vetx.o
+ .debug_info    0x0000669a      0x9b1 ./Core/ethernet/W5500/w5500.o
+ .debug_info    0x0000704b     0x35ee ./Core/ethernet/net_app.o
+ .debug_info    0x0000a639      0xe01 ./Core/ethernet/net_services.o
+ .debug_info    0x0000b43a     0x1895 ./Core/ethernet/socket.o
+ .debug_info    0x0000cccf     0x10ee ./Core/ethernet/w5500_hal.o
+ .debug_info    0x0000ddbd     0x16a7 ./Core/ethernet/wizchip_conf.o
+ .debug_info    0x0000f464     0x25ee ./Core/user/access.o
+ .debug_info    0x00011a52      0x5ac ./Core/user/log.o
+ .debug_info    0x00011ffe      0xb26 ./Core/user/pcf8563.o
+ .debug_info    0x00012b24      0x954 ./Core/user/timApp.o
+ .debug_info    0x00013478      0xb3f ./Core/user/usart.o
+ .debug_info    0x00013fb7      0xf32 ./Core/user/user.o
+ .debug_info    0x00014ee9     0x1045 ./Core/user/w25q128.o
+ .debug_info    0x00015f2e      0x4e7 ./Core/user/wiegand.o
+ .debug_info    0x00016415      0xc10 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
+ .debug_info    0x00017025     0x216f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
+ .debug_info    0x00019194      0xd68 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
+ .debug_info    0x00019efc      0xa6b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
+ .debug_info    0x0001a967      0xa57 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
+ .debug_info    0x0001b3be      0x63a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
+ .debug_info    0x0001b9f8     0x3fa5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
+ .debug_info    0x0001f99d      0xa61 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
+ .debug_info    0x000203fe      0x25e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
+ .debug_info    0x0002065c      0x951 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
+ .debug_info    0x00020fad      0xe7a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
+ .debug_info    0x00021e27      0xbac ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
+ .debug_info    0x000229d3     0x22bf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
+ .debug_info    0x00024c92     0x426b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
+ .debug_info    0x00028efd     0x1def ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
+ .debug_info    0x0002acec     0x61e8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
+ .debug_info    0x00030ed4     0x12e4 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
 
-.debug_abbrev   0x00000000     0x69b3
- .debug_abbrev  0x00000000      0x3dd ./Core/Src/main.o
- .debug_abbrev  0x000003dd      0x29b ./Core/Src/stm32g0xx_hal_msp.o
- .debug_abbrev  0x00000678      0x205 ./Core/Src/stm32g0xx_it.o
- .debug_abbrev  0x0000087d      0x208 ./Core/Src/syscalls.o
- .debug_abbrev  0x00000a85       0xdc ./Core/Src/sysmem.o
- .debug_abbrev  0x00000b61      0x148 ./Core/Src/system_stm32g0xx.o
- .debug_abbrev  0x00000ca9       0x24 ./Core/Startup/startup_stm32g0b1vetx.o
- .debug_abbrev  0x00000ccd      0x27b ./Core/ethernet/W5500/w5500.o
- .debug_abbrev  0x00000f48      0x65b ./Core/ethernet/net_app.o
- .debug_abbrev  0x000015a3      0x382 ./Core/ethernet/net_services.o
- .debug_abbrev  0x00001925      0x316 ./Core/ethernet/socket.o
- .debug_abbrev  0x00001c3b      0x2c6 ./Core/ethernet/w5500_hal.o
- .debug_abbrev  0x00001f01      0x3ea ./Core/ethernet/wizchip_conf.o
- .debug_abbrev  0x000022eb      0x451 ./Core/user/access.o
- .debug_abbrev  0x0000273c      0x1ca ./Core/user/log.o
- .debug_abbrev  0x00002906      0x203 ./Core/user/pcf8563.o
- .debug_abbrev  0x00002b09      0x1d1 ./Core/user/timApp.o
- .debug_abbrev  0x00002cda      0x257 ./Core/user/usart.o
- .debug_abbrev  0x00002f31      0x284 ./Core/user/user.o
- .debug_abbrev  0x000031b5      0x283 ./Core/user/w25q128.o
- .debug_abbrev  0x00003438      0x1ea ./Core/user/wiegand.o
- .debug_abbrev  0x00003622      0x30a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
- .debug_abbrev  0x0000392c      0x363 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
- .debug_abbrev  0x00003c8f      0x333 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
- .debug_abbrev  0x00003fc2      0x2cb ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
- .debug_abbrev  0x0000428d      0x2b1 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
- .debug_abbrev  0x0000453e      0x25e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
- .debug_abbrev  0x0000479c      0x3b8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
- .debug_abbrev  0x00004b54      0x1ec ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
- .debug_abbrev  0x00004d40      0x189 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
- .debug_abbrev  0x00004ec9      0x28f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
- .debug_abbrev  0x00005158      0x363 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
- .debug_abbrev  0x000054bb      0x2f5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
- .debug_abbrev  0x000057b0      0x393 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
- .debug_abbrev  0x00005b43      0x3d8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
- .debug_abbrev  0x00005f1b      0x320 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
- .debug_abbrev  0x0000623b      0x42f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
- .debug_abbrev  0x0000666a      0x349 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+.debug_abbrev   0x00000000     0x6993
+ .debug_abbrev  0x00000000      0x3bd ./Core/Src/main.o
+ .debug_abbrev  0x000003bd      0x29b ./Core/Src/stm32g0xx_hal_msp.o
+ .debug_abbrev  0x00000658      0x205 ./Core/Src/stm32g0xx_it.o
+ .debug_abbrev  0x0000085d      0x208 ./Core/Src/syscalls.o
+ .debug_abbrev  0x00000a65       0xdc ./Core/Src/sysmem.o
+ .debug_abbrev  0x00000b41      0x148 ./Core/Src/system_stm32g0xx.o
+ .debug_abbrev  0x00000c89       0x24 ./Core/Startup/startup_stm32g0b1vetx.o
+ .debug_abbrev  0x00000cad      0x27b ./Core/ethernet/W5500/w5500.o
+ .debug_abbrev  0x00000f28      0x65b ./Core/ethernet/net_app.o
+ .debug_abbrev  0x00001583      0x382 ./Core/ethernet/net_services.o
+ .debug_abbrev  0x00001905      0x316 ./Core/ethernet/socket.o
+ .debug_abbrev  0x00001c1b      0x2c6 ./Core/ethernet/w5500_hal.o
+ .debug_abbrev  0x00001ee1      0x3ea ./Core/ethernet/wizchip_conf.o
+ .debug_abbrev  0x000022cb      0x451 ./Core/user/access.o
+ .debug_abbrev  0x0000271c      0x1ca ./Core/user/log.o
+ .debug_abbrev  0x000028e6      0x203 ./Core/user/pcf8563.o
+ .debug_abbrev  0x00002ae9      0x1d1 ./Core/user/timApp.o
+ .debug_abbrev  0x00002cba      0x257 ./Core/user/usart.o
+ .debug_abbrev  0x00002f11      0x284 ./Core/user/user.o
+ .debug_abbrev  0x00003195      0x283 ./Core/user/w25q128.o
+ .debug_abbrev  0x00003418      0x1ea ./Core/user/wiegand.o
+ .debug_abbrev  0x00003602      0x30a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
+ .debug_abbrev  0x0000390c      0x363 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
+ .debug_abbrev  0x00003c6f      0x333 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
+ .debug_abbrev  0x00003fa2      0x2cb ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
+ .debug_abbrev  0x0000426d      0x2b1 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
+ .debug_abbrev  0x0000451e      0x25e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
+ .debug_abbrev  0x0000477c      0x3b8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
+ .debug_abbrev  0x00004b34      0x1ec ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
+ .debug_abbrev  0x00004d20      0x189 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
+ .debug_abbrev  0x00004ea9      0x28f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
+ .debug_abbrev  0x00005138      0x363 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
+ .debug_abbrev  0x0000549b      0x2f5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
+ .debug_abbrev  0x00005790      0x393 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
+ .debug_abbrev  0x00005b23      0x3d8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
+ .debug_abbrev  0x00005efb      0x320 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
+ .debug_abbrev  0x0000621b      0x42f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
+ .debug_abbrev  0x0000664a      0x349 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
 
 .debug_aranges  0x00000000     0x1c20
  .debug_aranges
@@ -8314,205 +8319,205 @@ LOAD E:/Program Files/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.
  .debug_rnglists
                 0x00001f06       0xa6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
 
-.debug_macro    0x00000000    0x24097
- .debug_macro   0x00000000      0x38d ./Core/Src/main.o
- .debug_macro   0x0000038d      0xab4 ./Core/Src/main.o
- .debug_macro   0x00000e41      0x142 ./Core/Src/main.o
- .debug_macro   0x00000f83       0x2e ./Core/Src/main.o
- .debug_macro   0x00000fb1       0x28 ./Core/Src/main.o
- .debug_macro   0x00000fd9       0x22 ./Core/Src/main.o
- .debug_macro   0x00000ffb       0x8e ./Core/Src/main.o
- .debug_macro   0x00001089       0x51 ./Core/Src/main.o
- .debug_macro   0x000010da      0x103 ./Core/Src/main.o
- .debug_macro   0x000011dd       0x6a ./Core/Src/main.o
- .debug_macro   0x00001247      0x1df ./Core/Src/main.o
- .debug_macro   0x00001426       0x1c ./Core/Src/main.o
- .debug_macro   0x00001442       0x22 ./Core/Src/main.o
- .debug_macro   0x00001464       0xd1 ./Core/Src/main.o
- .debug_macro   0x00001535      0x4da ./Core/Src/main.o
- .debug_macro   0x00001a0f      0x11f ./Core/Src/main.o
- .debug_macro   0x00001b2e     0xf46a ./Core/Src/main.o
- .debug_macro   0x00010f98       0x66 ./Core/Src/main.o
- .debug_macro   0x00010ffe     0x3527 ./Core/Src/main.o
- .debug_macro   0x00014525      0x190 ./Core/Src/main.o
- .debug_macro   0x000146b5       0x5c ./Core/Src/main.o
- .debug_macro   0x00014711      0x72c ./Core/Src/main.o
- .debug_macro   0x00014e3d     0x1579 ./Core/Src/main.o
- .debug_macro   0x000163b6      0x535 ./Core/Src/main.o
- .debug_macro   0x000168eb      0x1cf ./Core/Src/main.o
- .debug_macro   0x00016aba      0x25b ./Core/Src/main.o
- .debug_macro   0x00016d15      0x4f5 ./Core/Src/main.o
- .debug_macro   0x0001720a      0x280 ./Core/Src/main.o
- .debug_macro   0x0001748a      0x417 ./Core/Src/main.o
- .debug_macro   0x000178a1      0x1b2 ./Core/Src/main.o
- .debug_macro   0x00017a53       0x43 ./Core/Src/main.o
- .debug_macro   0x00017a96      0x1f1 ./Core/Src/main.o
- .debug_macro   0x00017c87      0x8bb ./Core/Src/main.o
- .debug_macro   0x00018542      0x5c9 ./Core/Src/main.o
- .debug_macro   0x00018b0b       0x2e ./Core/Src/main.o
- .debug_macro   0x00018b39      0x1e4 ./Core/Src/main.o
- .debug_macro   0x00018d1d      0x3f3 ./Core/Src/main.o
- .debug_macro   0x00019110       0x28 ./Core/Src/main.o
- .debug_macro   0x00019138      0x123 ./Core/Src/main.o
- .debug_macro   0x0001925b      0x22c ./Core/Src/main.o
- .debug_macro   0x00019487       0x67 ./Core/Src/main.o
- .debug_macro   0x000194ee       0xa5 ./Core/Src/main.o
- .debug_macro   0x00019593       0x85 ./Core/Src/main.o
- .debug_macro   0x00019618      0x145 ./Core/Src/main.o
- .debug_macro   0x0001975d      0x320 ./Core/Src/main.o
- .debug_macro   0x00019a7d      0x305 ./Core/Src/main.o
- .debug_macro   0x00019d82      0xae5 ./Core/Src/main.o
- .debug_macro   0x0001a867      0x239 ./Core/Src/main.o
- .debug_macro   0x0001aaa0      0x693 ./Core/Src/main.o
- .debug_macro   0x0001b133       0xa6 ./Core/Src/main.o
- .debug_macro   0x0001b1d9      0x5df ./Core/Src/main.o
- .debug_macro   0x0001b7b8       0x61 ./Core/Src/main.o
- .debug_macro   0x0001b819       0x24 ./Core/Src/main.o
- .debug_macro   0x0001b83d       0x43 ./Core/Src/main.o
- .debug_macro   0x0001b880       0x34 ./Core/Src/main.o
- .debug_macro   0x0001b8b4      0x370 ./Core/Src/main.o
- .debug_macro   0x0001bc24       0x16 ./Core/Src/main.o
- .debug_macro   0x0001bc3a       0x4a ./Core/Src/main.o
- .debug_macro   0x0001bc84       0x34 ./Core/Src/main.o
- .debug_macro   0x0001bcb8       0x10 ./Core/Src/main.o
- .debug_macro   0x0001bcc8       0x58 ./Core/Src/main.o
- .debug_macro   0x0001bd20       0x8e ./Core/Src/main.o
- .debug_macro   0x0001bdae       0x1c ./Core/Src/main.o
- .debug_macro   0x0001bdca      0x185 ./Core/Src/main.o
- .debug_macro   0x0001bf4f       0x10 ./Core/Src/main.o
- .debug_macro   0x0001bf5f       0x3c ./Core/Src/main.o
- .debug_macro   0x0001bf9b       0x20 ./Core/Src/main.o
- .debug_macro   0x0001bfbb       0x1c ./Core/Src/main.o
- .debug_macro   0x0001bfd7       0x10 ./Core/Src/main.o
- .debug_macro   0x0001bfe7       0x1c ./Core/Src/main.o
- .debug_macro   0x0001c003       0x16 ./Core/Src/main.o
- .debug_macro   0x0001c019      0x146 ./Core/Src/main.o
- .debug_macro   0x0001c15f       0x22 ./Core/Src/main.o
- .debug_macro   0x0001c181       0x16 ./Core/Src/main.o
- .debug_macro   0x0001c197       0x16 ./Core/Src/main.o
- .debug_macro   0x0001c1ad       0x29 ./Core/Src/main.o
- .debug_macro   0x0001c1d6       0xfa ./Core/Src/main.o
- .debug_macro   0x0001c2d0      0x38d ./Core/Src/stm32g0xx_hal_msp.o
- .debug_macro   0x0001c65d      0x397 ./Core/Src/stm32g0xx_it.o
- .debug_macro   0x0001c9f4      0x274 ./Core/Src/syscalls.o
- .debug_macro   0x0001cc68       0x5b ./Core/Src/syscalls.o
- .debug_macro   0x0001ccc3       0x94 ./Core/Src/syscalls.o
- .debug_macro   0x0001cd57       0x57 ./Core/Src/syscalls.o
- .debug_macro   0x0001cdae       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001cdbe       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001cdce       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001cdde       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001cdee       0x1c ./Core/Src/syscalls.o
- .debug_macro   0x0001ce0a       0x52 ./Core/Src/syscalls.o
- .debug_macro   0x0001ce5c       0x22 ./Core/Src/syscalls.o
- .debug_macro   0x0001ce7e       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001ce8e       0x52 ./Core/Src/syscalls.o
- .debug_macro   0x0001cee0       0xcf ./Core/Src/syscalls.o
- .debug_macro   0x0001cfaf       0x1c ./Core/Src/syscalls.o
- .debug_macro   0x0001cfcb       0x3d ./Core/Src/syscalls.o
- .debug_macro   0x0001d008       0x35 ./Core/Src/syscalls.o
- .debug_macro   0x0001d03d      0x12c ./Core/Src/syscalls.o
- .debug_macro   0x0001d169       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001d179      0x242 ./Core/Src/syscalls.o
- .debug_macro   0x0001d3bb       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0001d3cb      0x18a ./Core/Src/syscalls.o
- .debug_macro   0x0001d555       0x16 ./Core/Src/syscalls.o
- .debug_macro   0x0001d56b       0xce ./Core/Src/syscalls.o
- .debug_macro   0x0001d639      0x112 ./Core/Src/sysmem.o
- .debug_macro   0x0001d74b      0x23c ./Core/Src/sysmem.o
- .debug_macro   0x0001d987      0x23f ./Core/Src/system_stm32g0xx.o
- .debug_macro   0x0001dbc6       0x9d ./Core/ethernet/W5500/w5500.o
- .debug_macro   0x0001dc63       0x85 ./Core/ethernet/W5500/w5500.o
- .debug_macro   0x0001dce8       0x66 ./Core/ethernet/W5500/w5500.o
- .debug_macro   0x0001dd4e      0x5fc ./Core/ethernet/W5500/w5500.o
- .debug_macro   0x0001e34a      0x3f9 ./Core/ethernet/net_app.o
- .debug_macro   0x0001e743       0x8e ./Core/ethernet/net_app.o
- .debug_macro   0x0001e7d1       0x1c ./Core/ethernet/net_app.o
- .debug_macro   0x0001e7ed       0x40 ./Core/ethernet/net_app.o
- .debug_macro   0x0001e82d      0x186 ./Core/ethernet/net_app.o
- .debug_macro   0x0001e9b3      0x236 ./Core/ethernet/net_app.o
- .debug_macro   0x0001ebe9       0x4c ./Core/ethernet/net_app.o
- .debug_macro   0x0001ec35      0x409 ./Core/ethernet/net_services.o
- .debug_macro   0x0001f03e       0x16 ./Core/ethernet/net_services.o
- .debug_macro   0x0001f054       0xf6 ./Core/ethernet/socket.o
- .debug_macro   0x0001f14a       0x7f ./Core/ethernet/socket.o
- .debug_macro   0x0001f1c9      0x180 ./Core/ethernet/socket.o
- .debug_macro   0x0001f349      0x3c2 ./Core/ethernet/w5500_hal.o
- .debug_macro   0x0001f70b       0x94 ./Core/ethernet/wizchip_conf.o
- .debug_macro   0x0001f79f      0x40b ./Core/user/access.o
- .debug_macro   0x0001fbaa      0x230 ./Core/user/access.o
- .debug_macro   0x0001fdda      0x3b8 ./Core/user/log.o
- .debug_macro   0x00020192       0x46 ./Core/user/log.o
- .debug_macro   0x000201d8      0x3a2 ./Core/user/pcf8563.o
- .debug_macro   0x0002057a      0x38d ./Core/user/timApp.o
- .debug_macro   0x00020907      0x3a2 ./Core/user/usart.o
- .debug_macro   0x00020ca9       0x10 ./Core/user/usart.o
- .debug_macro   0x00020cb9      0x3a2 ./Core/user/user.o
- .debug_macro   0x0002105b       0x88 ./Core/user/user.o
- .debug_macro   0x000210e3      0x3a8 ./Core/user/w25q128.o
- .debug_macro   0x0002148b       0x3a ./Core/user/w25q128.o
- .debug_macro   0x000214c5      0x397 ./Core/user/wiegand.o
- .debug_macro   0x0002185c      0x263 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
- .debug_macro   0x00021abf      0x263 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
- .debug_macro   0x00021d22      0x24b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
- .debug_macro   0x00021f6d      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
- .debug_macro   0x000221ac      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
- .debug_macro   0x000223eb      0x246 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
- .debug_macro   0x00022631      0x30b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
- .debug_macro   0x0002293c      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
- .debug_macro   0x00022b7b      0x24d ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
- .debug_macro   0x00022dc8      0x269 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
- .debug_macro   0x00023031      0x287 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
- .debug_macro   0x000232b8      0x257 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
- .debug_macro   0x0002350f      0x247 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
- .debug_macro   0x00023756      0x247 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
- .debug_macro   0x0002399d      0x245 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
- .debug_macro   0x00023be2      0x26a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
- .debug_macro   0x00023e4c      0x24b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+.debug_macro    0x00000000    0x240b3
+ .debug_macro   0x00000000      0x3a9 ./Core/Src/main.o
+ .debug_macro   0x000003a9      0xab4 ./Core/Src/main.o
+ .debug_macro   0x00000e5d      0x142 ./Core/Src/main.o
+ .debug_macro   0x00000f9f       0x2e ./Core/Src/main.o
+ .debug_macro   0x00000fcd       0x28 ./Core/Src/main.o
+ .debug_macro   0x00000ff5       0x22 ./Core/Src/main.o
+ .debug_macro   0x00001017       0x8e ./Core/Src/main.o
+ .debug_macro   0x000010a5       0x51 ./Core/Src/main.o
+ .debug_macro   0x000010f6      0x103 ./Core/Src/main.o
+ .debug_macro   0x000011f9       0x6a ./Core/Src/main.o
+ .debug_macro   0x00001263      0x1df ./Core/Src/main.o
+ .debug_macro   0x00001442       0x1c ./Core/Src/main.o
+ .debug_macro   0x0000145e       0x22 ./Core/Src/main.o
+ .debug_macro   0x00001480       0xd1 ./Core/Src/main.o
+ .debug_macro   0x00001551      0x4da ./Core/Src/main.o
+ .debug_macro   0x00001a2b      0x11f ./Core/Src/main.o
+ .debug_macro   0x00001b4a     0xf46a ./Core/Src/main.o
+ .debug_macro   0x00010fb4       0x66 ./Core/Src/main.o
+ .debug_macro   0x0001101a     0x3527 ./Core/Src/main.o
+ .debug_macro   0x00014541      0x190 ./Core/Src/main.o
+ .debug_macro   0x000146d1       0x5c ./Core/Src/main.o
+ .debug_macro   0x0001472d      0x72c ./Core/Src/main.o
+ .debug_macro   0x00014e59     0x1579 ./Core/Src/main.o
+ .debug_macro   0x000163d2      0x535 ./Core/Src/main.o
+ .debug_macro   0x00016907      0x1cf ./Core/Src/main.o
+ .debug_macro   0x00016ad6      0x25b ./Core/Src/main.o
+ .debug_macro   0x00016d31      0x4f5 ./Core/Src/main.o
+ .debug_macro   0x00017226      0x280 ./Core/Src/main.o
+ .debug_macro   0x000174a6      0x417 ./Core/Src/main.o
+ .debug_macro   0x000178bd      0x1b2 ./Core/Src/main.o
+ .debug_macro   0x00017a6f       0x43 ./Core/Src/main.o
+ .debug_macro   0x00017ab2      0x1f1 ./Core/Src/main.o
+ .debug_macro   0x00017ca3      0x8bb ./Core/Src/main.o
+ .debug_macro   0x0001855e      0x5c9 ./Core/Src/main.o
+ .debug_macro   0x00018b27       0x2e ./Core/Src/main.o
+ .debug_macro   0x00018b55      0x1e4 ./Core/Src/main.o
+ .debug_macro   0x00018d39      0x3f3 ./Core/Src/main.o
+ .debug_macro   0x0001912c       0x28 ./Core/Src/main.o
+ .debug_macro   0x00019154      0x123 ./Core/Src/main.o
+ .debug_macro   0x00019277      0x22c ./Core/Src/main.o
+ .debug_macro   0x000194a3       0x67 ./Core/Src/main.o
+ .debug_macro   0x0001950a       0xa5 ./Core/Src/main.o
+ .debug_macro   0x000195af       0x85 ./Core/Src/main.o
+ .debug_macro   0x00019634      0x145 ./Core/Src/main.o
+ .debug_macro   0x00019779      0x320 ./Core/Src/main.o
+ .debug_macro   0x00019a99      0x305 ./Core/Src/main.o
+ .debug_macro   0x00019d9e      0xae5 ./Core/Src/main.o
+ .debug_macro   0x0001a883      0x239 ./Core/Src/main.o
+ .debug_macro   0x0001aabc      0x693 ./Core/Src/main.o
+ .debug_macro   0x0001b14f       0xa6 ./Core/Src/main.o
+ .debug_macro   0x0001b1f5      0x5df ./Core/Src/main.o
+ .debug_macro   0x0001b7d4       0x61 ./Core/Src/main.o
+ .debug_macro   0x0001b835       0x24 ./Core/Src/main.o
+ .debug_macro   0x0001b859       0x43 ./Core/Src/main.o
+ .debug_macro   0x0001b89c       0x34 ./Core/Src/main.o
+ .debug_macro   0x0001b8d0      0x370 ./Core/Src/main.o
+ .debug_macro   0x0001bc40       0x16 ./Core/Src/main.o
+ .debug_macro   0x0001bc56       0x4a ./Core/Src/main.o
+ .debug_macro   0x0001bca0       0x34 ./Core/Src/main.o
+ .debug_macro   0x0001bcd4       0x10 ./Core/Src/main.o
+ .debug_macro   0x0001bce4       0x58 ./Core/Src/main.o
+ .debug_macro   0x0001bd3c       0x8e ./Core/Src/main.o
+ .debug_macro   0x0001bdca       0x1c ./Core/Src/main.o
+ .debug_macro   0x0001bde6      0x185 ./Core/Src/main.o
+ .debug_macro   0x0001bf6b       0x10 ./Core/Src/main.o
+ .debug_macro   0x0001bf7b       0x3c ./Core/Src/main.o
+ .debug_macro   0x0001bfb7       0x20 ./Core/Src/main.o
+ .debug_macro   0x0001bfd7       0x1c ./Core/Src/main.o
+ .debug_macro   0x0001bff3       0x10 ./Core/Src/main.o
+ .debug_macro   0x0001c003       0x1c ./Core/Src/main.o
+ .debug_macro   0x0001c01f       0x16 ./Core/Src/main.o
+ .debug_macro   0x0001c035      0x146 ./Core/Src/main.o
+ .debug_macro   0x0001c17b       0x22 ./Core/Src/main.o
+ .debug_macro   0x0001c19d       0x16 ./Core/Src/main.o
+ .debug_macro   0x0001c1b3       0x16 ./Core/Src/main.o
+ .debug_macro   0x0001c1c9       0x29 ./Core/Src/main.o
+ .debug_macro   0x0001c1f2       0xfa ./Core/Src/main.o
+ .debug_macro   0x0001c2ec       0x8e ./Core/Src/main.o
+ .debug_macro   0x0001c37a       0x1c ./Core/Src/main.o
+ .debug_macro   0x0001c396      0x38d ./Core/Src/stm32g0xx_hal_msp.o
+ .debug_macro   0x0001c723      0x397 ./Core/Src/stm32g0xx_it.o
+ .debug_macro   0x0001caba      0x274 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cd2e       0x5b ./Core/Src/syscalls.o
+ .debug_macro   0x0001cd89       0x94 ./Core/Src/syscalls.o
+ .debug_macro   0x0001ce1d       0x57 ./Core/Src/syscalls.o
+ .debug_macro   0x0001ce74       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001ce84       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001ce94       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cea4       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001ceb4       0x1c ./Core/Src/syscalls.o
+ .debug_macro   0x0001ced0       0x52 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cf22       0x22 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cf44       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cf54       0x52 ./Core/Src/syscalls.o
+ .debug_macro   0x0001cfa6       0xcf ./Core/Src/syscalls.o
+ .debug_macro   0x0001d075       0x1c ./Core/Src/syscalls.o
+ .debug_macro   0x0001d091       0x3d ./Core/Src/syscalls.o
+ .debug_macro   0x0001d0ce       0x35 ./Core/Src/syscalls.o
+ .debug_macro   0x0001d103      0x12c ./Core/Src/syscalls.o
+ .debug_macro   0x0001d22f       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001d23f      0x242 ./Core/Src/syscalls.o
+ .debug_macro   0x0001d481       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0001d491      0x18a ./Core/Src/syscalls.o
+ .debug_macro   0x0001d61b       0x16 ./Core/Src/syscalls.o
+ .debug_macro   0x0001d631       0xce ./Core/Src/syscalls.o
+ .debug_macro   0x0001d6ff      0x112 ./Core/Src/sysmem.o
+ .debug_macro   0x0001d811      0x23c ./Core/Src/sysmem.o
+ .debug_macro   0x0001da4d      0x23f ./Core/Src/system_stm32g0xx.o
+ .debug_macro   0x0001dc8c       0x9d ./Core/ethernet/W5500/w5500.o
+ .debug_macro   0x0001dd29       0x85 ./Core/ethernet/W5500/w5500.o
+ .debug_macro   0x0001ddae       0x66 ./Core/ethernet/W5500/w5500.o
+ .debug_macro   0x0001de14      0x5fc ./Core/ethernet/W5500/w5500.o
+ .debug_macro   0x0001e410      0x3f9 ./Core/ethernet/net_app.o
+ .debug_macro   0x0001e809       0x40 ./Core/ethernet/net_app.o
+ .debug_macro   0x0001e849      0x186 ./Core/ethernet/net_app.o
+ .debug_macro   0x0001e9cf      0x236 ./Core/ethernet/net_app.o
+ .debug_macro   0x0001ec05       0x4c ./Core/ethernet/net_app.o
+ .debug_macro   0x0001ec51      0x409 ./Core/ethernet/net_services.o
+ .debug_macro   0x0001f05a       0x16 ./Core/ethernet/net_services.o
+ .debug_macro   0x0001f070       0xf6 ./Core/ethernet/socket.o
+ .debug_macro   0x0001f166       0x7f ./Core/ethernet/socket.o
+ .debug_macro   0x0001f1e5      0x180 ./Core/ethernet/socket.o
+ .debug_macro   0x0001f365      0x3c2 ./Core/ethernet/w5500_hal.o
+ .debug_macro   0x0001f727       0x94 ./Core/ethernet/wizchip_conf.o
+ .debug_macro   0x0001f7bb      0x40b ./Core/user/access.o
+ .debug_macro   0x0001fbc6      0x230 ./Core/user/access.o
+ .debug_macro   0x0001fdf6      0x3b8 ./Core/user/log.o
+ .debug_macro   0x000201ae       0x46 ./Core/user/log.o
+ .debug_macro   0x000201f4      0x3a2 ./Core/user/pcf8563.o
+ .debug_macro   0x00020596      0x38d ./Core/user/timApp.o
+ .debug_macro   0x00020923      0x3a2 ./Core/user/usart.o
+ .debug_macro   0x00020cc5       0x10 ./Core/user/usart.o
+ .debug_macro   0x00020cd5      0x3a2 ./Core/user/user.o
+ .debug_macro   0x00021077       0x88 ./Core/user/user.o
+ .debug_macro   0x000210ff      0x3a8 ./Core/user/w25q128.o
+ .debug_macro   0x000214a7       0x3a ./Core/user/w25q128.o
+ .debug_macro   0x000214e1      0x397 ./Core/user/wiegand.o
+ .debug_macro   0x00021878      0x263 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
+ .debug_macro   0x00021adb      0x263 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
+ .debug_macro   0x00021d3e      0x24b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
+ .debug_macro   0x00021f89      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
+ .debug_macro   0x000221c8      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
+ .debug_macro   0x00022407      0x246 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
+ .debug_macro   0x0002264d      0x30b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
+ .debug_macro   0x00022958      0x23f ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
+ .debug_macro   0x00022b97      0x24d ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
+ .debug_macro   0x00022de4      0x269 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
+ .debug_macro   0x0002304d      0x287 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
+ .debug_macro   0x000232d4      0x257 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
+ .debug_macro   0x0002352b      0x247 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
+ .debug_macro   0x00023772      0x247 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
+ .debug_macro   0x000239b9      0x245 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
+ .debug_macro   0x00023bfe      0x26a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
+ .debug_macro   0x00023e68      0x24b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
 
-.debug_line     0x00000000    0x34778
- .debug_line    0x00000000     0x1516 ./Core/Src/main.o
- .debug_line    0x00001516      0xfdd ./Core/Src/stm32g0xx_hal_msp.o
- .debug_line    0x000024f3      0xc0d ./Core/Src/stm32g0xx_it.o
- .debug_line    0x00003100      0xaa6 ./Core/Src/syscalls.o
- .debug_line    0x00003ba6      0x6a9 ./Core/Src/sysmem.o
- .debug_line    0x0000424f      0x90d ./Core/Src/system_stm32g0xx.o
- .debug_line    0x00004b5c       0x7b ./Core/Startup/startup_stm32g0b1vetx.o
- .debug_line    0x00004bd7      0x8a1 ./Core/ethernet/W5500/w5500.o
- .debug_line    0x00005478     0x2203 ./Core/ethernet/net_app.o
- .debug_line    0x0000767b      0xf87 ./Core/ethernet/net_services.o
- .debug_line    0x00008602     0x1477 ./Core/ethernet/socket.o
- .debug_line    0x00009a79      0xd1c ./Core/ethernet/w5500_hal.o
- .debug_line    0x0000a795     0x10cd ./Core/ethernet/wizchip_conf.o
- .debug_line    0x0000b862     0x1fde ./Core/user/access.o
- .debug_line    0x0000d840      0xe50 ./Core/user/log.o
- .debug_line    0x0000e690      0xd13 ./Core/user/pcf8563.o
- .debug_line    0x0000f3a3      0xb5d ./Core/user/timApp.o
- .debug_line    0x0000ff00      0xc9a ./Core/user/usart.o
- .debug_line    0x00010b9a      0xe58 ./Core/user/user.o
- .debug_line    0x000119f2      0xe4f ./Core/user/w25q128.o
- .debug_line    0x00012841      0xe66 ./Core/user/wiegand.o
- .debug_line    0x000136a7      0xdd3 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
- .debug_line    0x0001447a     0x20d8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
- .debug_line    0x00016552      0xce9 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
- .debug_line    0x0001723b      0xd5b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
- .debug_line    0x00017f96     0x12fe ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
- .debug_line    0x00019294      0xd91 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
- .debug_line    0x0001a025     0x55d0 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
- .debug_line    0x0001f5f5      0xa88 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
- .debug_line    0x0002007d      0x912 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
- .debug_line    0x0002098f      0xeb6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
- .debug_line    0x00021845     0x1626 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
- .debug_line    0x00022e6b     0x15a4 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
- .debug_line    0x0002440f     0x2fa6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
- .debug_line    0x000273b5     0x4e82 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
- .debug_line    0x0002c237     0x1ef2 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
- .debug_line    0x0002e129     0x54a5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
- .debug_line    0x000335ce     0x11aa ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
+.debug_line     0x00000000    0x347bf
+ .debug_line    0x00000000     0x155d ./Core/Src/main.o
+ .debug_line    0x0000155d      0xfdd ./Core/Src/stm32g0xx_hal_msp.o
+ .debug_line    0x0000253a      0xc0d ./Core/Src/stm32g0xx_it.o
+ .debug_line    0x00003147      0xaa6 ./Core/Src/syscalls.o
+ .debug_line    0x00003bed      0x6a9 ./Core/Src/sysmem.o
+ .debug_line    0x00004296      0x90d ./Core/Src/system_stm32g0xx.o
+ .debug_line    0x00004ba3       0x7b ./Core/Startup/startup_stm32g0b1vetx.o
+ .debug_line    0x00004c1e      0x8a1 ./Core/ethernet/W5500/w5500.o
+ .debug_line    0x000054bf     0x2203 ./Core/ethernet/net_app.o
+ .debug_line    0x000076c2      0xf87 ./Core/ethernet/net_services.o
+ .debug_line    0x00008649     0x1477 ./Core/ethernet/socket.o
+ .debug_line    0x00009ac0      0xd1c ./Core/ethernet/w5500_hal.o
+ .debug_line    0x0000a7dc     0x10cd ./Core/ethernet/wizchip_conf.o
+ .debug_line    0x0000b8a9     0x1fde ./Core/user/access.o
+ .debug_line    0x0000d887      0xe50 ./Core/user/log.o
+ .debug_line    0x0000e6d7      0xd13 ./Core/user/pcf8563.o
+ .debug_line    0x0000f3ea      0xb5d ./Core/user/timApp.o
+ .debug_line    0x0000ff47      0xc9a ./Core/user/usart.o
+ .debug_line    0x00010be1      0xe58 ./Core/user/user.o
+ .debug_line    0x00011a39      0xe4f ./Core/user/w25q128.o
+ .debug_line    0x00012888      0xe66 ./Core/user/wiegand.o
+ .debug_line    0x000136ee      0xdd3 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
+ .debug_line    0x000144c1     0x20d8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
+ .debug_line    0x00016599      0xce9 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
+ .debug_line    0x00017282      0xd5b ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
+ .debug_line    0x00017fdd     0x12fe ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.o
+ .debug_line    0x000192db      0xd91 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
+ .debug_line    0x0001a06c     0x55d0 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.o
+ .debug_line    0x0001f63c      0xa88 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.o
+ .debug_line    0x000200c4      0x912 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_iwdg.o
+ .debug_line    0x000209d6      0xeb6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
+ .debug_line    0x0002188c     0x1626 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
+ .debug_line    0x00022eb2     0x15a4 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
+ .debug_line    0x00024456     0x2fa6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.o
+ .debug_line    0x000273fc     0x4e82 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
+ .debug_line    0x0002c27e     0x1ef2 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
+ .debug_line    0x0002e170     0x54a5 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.o
+ .debug_line    0x00033615     0x11aa ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.o
 
 .debug_str      0x00000000    0xd440e
  .debug_str     0x00000000    0xd440e ./Core/Src/main.o
-                              0xc6eb6 (size before relaxing)
+                              0xc7140 (size before relaxing)
  .debug_str     0x000d440e    0xc6bdb ./Core/Src/stm32g0xx_hal_msp.o
  .debug_str     0x000d440e    0xc5fbc ./Core/Src/stm32g0xx_it.o
  .debug_str     0x000d440e     0x98cb ./Core/Src/syscalls.o

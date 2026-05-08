@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "user.h"
+#include "wiegand.h"
+#include "net_services.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,11 +124,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
   __enable_irq();
 
-  printf("\r\n@@@@@@@@@@@@@ STM32G0 KZQ_APP RUN @@@@@@@@@@@@@\r\n");
+  printf("\r\n---------------- STM32G0 KZQ_APP RUN ---------------------\r\n");
   HAL_GPIO_WritePin(BUZ_GPIO_Port, BUZ_Pin, GPIO_PIN_SET);
   HAL_Delay(20);
   read_system_parameters();
   HAL_GPIO_WritePin(BUZ_GPIO_Port, BUZ_Pin, GPIO_PIN_RESET);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -138,9 +141,6 @@ int main(void)
     /* USER CODE BEGIN 3 */
     if(HAL_GPIO_ReadPin(KEY_GPIO_Port,KEY_Pin) == GPIO_PIN_RESET)
 	{
-		//OTA[0] = 0xFF;
-		//OTA[1] = 0xFF;
-		//writeW25q128(OTA_SIGN_ADDR, OTA, 2);
 		while(HAL_GPIO_ReadPin(KEY_GPIO_Port,KEY_Pin) == GPIO_PIN_RESET);
 		NVIC_SystemReset();
 	}
