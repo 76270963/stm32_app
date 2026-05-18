@@ -37,7 +37,6 @@ static uint32_t s_index_entry_count = 0;
 static uint16_t s_run_count = 0;
 static uint16_t s_current_run = 0;
 static uint32_t s_final_write_offset = USER_INDEX_ADDR;
-static uint32_t s_current_record_index = 0;
 static bool s_rebuild_active = false;
 static bool s_rebuild_pending = false;
 static uint32_t s_last_rebuild_request_tick = 0;
@@ -45,6 +44,10 @@ static bool s_merge_initialized = false;
 static UserIndexRun s_runs[USER_INDEX_MAX_ENTRIES / USER_INDEX_CHUNK_RECORDS + 2];
 static UserIndexEntry s_output_buffer[USER_INDEX_OUTPUT_ENTRIES];
 static uint16_t s_output_count = 0;
+
+// 静态缓冲区，避免栈溢出
+static uint8_t s_chunk_buffer[USER_INDEX_CHUNK_RECORDS * USER_INDEX_RECORD_SIZE];
+static UserIndexEntry s_entry_buffer[USER_INDEX_CHUNK_RECORDS];
 
 static uint32_t UserIndex_CalcCrc(const UserIndexMeta *meta)
 {
@@ -211,7 +214,6 @@ bool UserIndex_Init(void)
     s_run_count = 0;
     s_current_run = 0;
     s_final_write_offset = USER_INDEX_ADDR;
-    s_current_record_index = 0;
     return s_index_valid;
 }
 
@@ -269,7 +271,6 @@ bool UserIndex_RebuildStart(void)
     s_run_count = 0;
     s_current_run = 0;
     s_final_write_offset = USER_INDEX_ADDR;
-    s_current_record_index = 0;
     s_index_entry_count = 0;
     s_index_valid = false;
     return true;
@@ -300,32 +301,30 @@ void UserIndex_Process(void)
         uint32_t remaining = USER_INDEX_MAX_ENTRIES - chunk_start;
         uint32_t chunk_records = remaining > USER_INDEX_CHUNK_RECORDS ? USER_INDEX_CHUNK_RECORDS : remaining;
         uint32_t byte_count = chunk_records * USER_INDEX_RECORD_SIZE;
-        uint8_t chunk_buffer[USER_INDEX_CHUNK_RECORDS * USER_INDEX_RECORD_SIZE];
-        UserIndexEntry entry_buffer[USER_INDEX_CHUNK_RECORDS];
 
         uint32_t read_addr = USER_TABLE_START_ADDR + chunk_start * USER_INDEX_RECORD_SIZE;
-        w25q128_read_data(read_addr, chunk_buffer, byte_count);
+        w25q128_read_data(read_addr, s_chunk_buffer, byte_count);
 
         uint32_t valid_count = 0;
         for (uint32_t i = 0; i < chunk_records; i++) {
-            uint8_t *record = &chunk_buffer[i * USER_INDEX_RECORD_SIZE];
+            uint8_t *record = &s_chunk_buffer[i * USER_INDEX_RECORD_SIZE];
             uint32_t card = (uint32_t)record[2] | ((uint32_t)record[3] << 8) | ((uint32_t)record[4] << 16) | ((uint32_t)record[5] << 24);
             if (card == 0xFFFFFFFFU) {
                 continue;
             }
-            entry_buffer[valid_count].card_number = card;
-            entry_buffer[valid_count].user_uid = (uint16_t)(chunk_start + i + 1);
-            entry_buffer[valid_count].reserved = 0;
+            s_entry_buffer[valid_count].card_number = card;
+            s_entry_buffer[valid_count].user_uid = (uint16_t)(chunk_start + i + 1);
+            s_entry_buffer[valid_count].reserved = 0;
             valid_count++;
         }
 
         if (valid_count > 1) {
-            qsort(entry_buffer, valid_count, sizeof(UserIndexEntry), CompareIndexEntry);
+            qsort(s_entry_buffer, valid_count, sizeof(UserIndexEntry), CompareIndexEntry);
         }
 
         if (valid_count > 0) {
             uint32_t run_addr = USER_INDEX_TEMP_ADDR + (uint32_t)s_run_count * USER_INDEX_RUN_SECTOR_SIZE;
-            writeW25q128(run_addr, (uint8_t *)entry_buffer, valid_count * sizeof(UserIndexEntry));
+            writeW25q128(run_addr, (uint8_t *)s_entry_buffer, valid_count * sizeof(UserIndexEntry));
             s_runs[s_run_count].entry_count = valid_count;
             s_run_count++;
             s_index_entry_count += valid_count;
@@ -403,15 +402,14 @@ uint32_t UserIndex_FindUserByCard(uint32_t card_number, uint8_t *user_buf)
     // 索引表无效时，使用fallback扫描
     {
         uint32_t base_uid = 1;
-        uint8_t chunk_buffer[USER_INDEX_CHUNK_RECORDS * USER_INDEX_RECORD_SIZE];
         while (base_uid <= USER_INDEX_MAX_ENTRIES) {
             uint32_t remaining = USER_INDEX_MAX_ENTRIES - (base_uid - 1);
             uint32_t chunk = remaining > USER_INDEX_CHUNK_RECORDS ? USER_INDEX_CHUNK_RECORDS : remaining;
             uint32_t byte_count = chunk * USER_INDEX_RECORD_SIZE;
             uint32_t addr = USER_TABLE_START_ADDR + (base_uid - 1) * USER_INDEX_RECORD_SIZE;
-            w25q128_read_data(addr, chunk_buffer, byte_count);
+            w25q128_read_data(addr, s_chunk_buffer, byte_count);
             for (uint32_t i = 0; i < chunk; i++) {
-                uint8_t *record = &chunk_buffer[i * USER_INDEX_RECORD_SIZE];
+                uint8_t *record = &s_chunk_buffer[i * USER_INDEX_RECORD_SIZE];
                 uint32_t card = (uint32_t)record[2] | ((uint32_t)record[3] << 8) | ((uint32_t)record[4] << 16) | ((uint32_t)record[5] << 24);
                 if (card == card_number) {
                     memcpy(user_buf, record, USER_INDEX_RECORD_SIZE);

@@ -136,6 +136,7 @@ int main(void)
       // 索引加载成功，验证索引数据
       UserIndex_VerifyIndex();
   }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
