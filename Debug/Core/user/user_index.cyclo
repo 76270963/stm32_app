@@ -1,0 +1,13 @@
+../Core/user/user_index.c:49:17:UserIndex_CalcCrc	2
+../Core/user/user_index.c:110:12:CompareIndexEntry	2
+../Core/user/user_index.c:119:13:UserIndex_FillRunBuffer	3
+../Core/user/user_index.c:82:13:UserIndex_InvalidateMeta	1
+../Core/user/user_index.c:96:13:UserIndex_CommitMeta	1
+../Core/user/user_index.c:199:6:UserIndex_Init	6
+../Core/user/user_index.c:254:6:UserIndex_IsRebuilding	1
+../Core/user/user_index.c:259:6:UserIndex_RebuildStart	2
+../Core/user/user_index.c:248:6:UserIndex_ForceRebuild	1
+../Core/user/user_index.c:218:6:UserIndex_VerifyIndex	8
+../Core/user/user_index.c:278:6:UserIndex_RequestRebuild	1
+../Core/user/user_index.c:285:6:UserIndex_Process	27
+../Core/user/user_index.c:385:10:UserIndex_FindUserByCard	13

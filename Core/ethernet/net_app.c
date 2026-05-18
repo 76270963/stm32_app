@@ -6,6 +6,7 @@
  */
 
 #include "net_app.h"
+#include "user_index.h"
 
 
 uint16_t BlockCount;
@@ -124,10 +125,18 @@ void pack_device_info(uint8_t *buf)
 
 bool CompareUID(const uint8_t *buf)
 {
-    if (buf[0] != 0x53) return false;
+    if (buf[0] != 0x53) {
+        printf("CompareUID: header fail 0x%02X\r\n", buf[0]);
+        return false;
+    }
     uint8_t uid[4];
     read_stm32_uid(uid);
-    return memcmp(&buf[1], uid, 4) == 0;
+    int cmp = memcmp(&buf[1], uid, 4);
+    if (cmp != 0) {
+        printf("CompareUID: uid mismatch, packet UID=%02X%02X%02X%02X, device UID=%02X%02X%02X%02X\r\n",
+               buf[1], buf[2], buf[3], buf[4], uid[0], uid[1], uid[2], uid[3]);
+    }
+    return cmp == 0;
 }
 
 
@@ -468,6 +477,9 @@ void handle_write_user(ReplyBuilder *rb, const uint8_t *req_buf, uint8_t socket)
 	uint32_t addr = USER_TABLE_START_ADDR + block_idx * 1024;
 	writeW25q128(addr, data, 1024);
 
+	printf("handle_write_user: block=%u trigger rebuild\r\n", block_idx);
+	UserIndex_RequestRebuild();
+
 	reply_add_byte(rb, req_buf[10]);
 	reply_add_byte(rb, req_buf[11]);
 	reply_add_byte(rb, 0x01);
@@ -784,6 +796,7 @@ void parse_tcp_data(uint8_t *buf, uint8_t socket)
 		}
 		else  //没有UID
 		{
+            printf("parse_tcp_data: no UID auth, CMD1=0x%02X CMD2=0x%02X\r\n", CMD1, CMD2);
 			switch (CMD1)
 			{
 				case 0x02:

@@ -44,7 +44,7 @@ Core/user/access.o: ../Core/user/access.c ../Core/user/access.h \
  ../Core/ethernet/wizchip_conf.h ../Core/ethernet/W5500/w5500.h \
  ../Core/ethernet/wizchip_conf.h ../Core/ethernet/net_services.h \
  ../Core/user/w25q128.h ../Core/ethernet/socket.h ../Core/user/access.h \
- ../Core/user/log.h
+ ../Core/user/log.h ../Core/user/user_index.h
 ../Core/user/access.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
@@ -100,3 +100,4 @@ Core/user/access.o: ../Core/user/access.c ../Core/user/access.h \
 ../Core/ethernet/socket.h:
 ../Core/user/access.h:
 ../Core/user/log.h:
+../Core/user/user_index.h:

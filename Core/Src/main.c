@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "user.h"
+#include "user_index.h"
 #include "wiegand.h"
 #include "net_services.h"
 /* USER CODE END Includes */
@@ -127,9 +128,14 @@ int main(void)
   printf("\r\n---------------- STM32G0 KZQ_APP RUN ---------------------\r\n");
   HAL_GPIO_WritePin(BUZ_GPIO_Port, BUZ_Pin, GPIO_PIN_SET);
   HAL_Delay(20);
-  read_system_parameters();
   HAL_GPIO_WritePin(BUZ_GPIO_Port, BUZ_Pin, GPIO_PIN_RESET);
-
+  read_system_parameters();
+  if (!UserIndex_Init()) {
+      UserIndex_RebuildStart();
+  } else {
+      // 索引加载成功，验证索引数据
+      UserIndex_VerifyIndex();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,6 +152,7 @@ int main(void)
 	}
     readwiegand(); // 4路韦根解析
     network_process();      // 网络状态机
+    UserIndex_Process();    // 后台增量重建/合并索引
 	HAL_IWDG_Refresh(&hiwdg);
   }
   /* USER CODE END 3 */

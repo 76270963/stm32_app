@@ -17,6 +17,7 @@
 "./Core/user/timApp.o"
 "./Core/user/usart.o"
 "./Core/user/user.o"
+"./Core/user/user_index.o"
 "./Core/user/w25q128.o"
 "./Core/user/wiegand.o"
 "./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o"

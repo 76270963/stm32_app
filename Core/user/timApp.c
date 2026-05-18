@@ -5,6 +5,7 @@
  *      Author: Administrator
  */
 #include "main.h"
+#include "access.h"
 
 static uint8_t uc10ms;
 static uint8_t uc100ms;

@@ -10,6 +10,7 @@
 #include "user.h"
 #include "w25q128.h"
 #include "net_app.h"
+#include "user_index.h"
 
 typedef struct {
 	bool active;
@@ -71,9 +72,6 @@ static uint16_t g_last_date = 0;
 
 
 
-
-
-
 static void GetCurrentDateTime(uint16_t *year, uint8_t *month, uint8_t *day,
                                uint8_t *hour, uint8_t *minute, uint8_t *second, uint8_t *weekday)
 {
@@ -88,29 +86,9 @@ static void GetCurrentDateTime(uint16_t *year, uint8_t *month, uint8_t *day,
     *weekday = dt.weekday;
 }
 
-//搜索卡
-static uint32_t FindUserByCard(uint32_t card_number, uint8_t *user_buf)
-{
-    uint8_t buf[26];
-    for (uint32_t uid = 1; uid <= MAX_USER_COUNT; uid++) {
-        uint32_t addr = USER_TABLE_START_ADDR + (uid - 1) * 26;
-        w25q128_read_data(addr, buf, 26);
-        uint32_t stored_card = *(uint32_t*)(buf + 2);
 
-        if (stored_card == 0xFFFFFFFF) {
-            break;
-        }
 
-        if (stored_card == card_number) {
-            memcpy(user_buf, buf, 26);
-            //printf("Password bytes: %02X %02X %02X %02X\n", user_buf[6], user_buf[7], user_buf[8], user_buf[9]);
-            return uid;
-        }
-    }
-    return 0;
-}
-
-//假日权限检查
+// 假日权限检查
 static uint8_t CheckHolidaySchedule(uint8_t group_id, uint16_t year, uint8_t month, uint8_t day,
                                     uint8_t hour, uint8_t minute)
 {
@@ -606,7 +584,7 @@ void WiegandAccess_ProcessCard(uint8_t reader_id, uint8_t wiegand_bits, uint32_t
 
     // 普通用户
     uint8_t user_buf[26];
-    uint32_t uid = FindUserByCard(card_number, user_buf);
+    uint32_t uid = UserIndex_FindUserByCard(card_number, user_buf);
     if (uid == 0) {
         printf("Event: %d (Card %08X, Reader%d)\r\n", EVENT_CARD_NOT_REG, (unsigned int)card_number, reader_id);
         report_event(EVENT_CARD_NOT_REG, point, card_number, 0xFFFF);
@@ -696,7 +674,7 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
 	if (multi_state->active && multi_state->waiting_for_pwd && multi_state->reader_id == reader_id && multi_state->pwd_len > 0)
 	{
 		uint8_t user_buf[26];
-		uint32_t uid = FindUserByCard(multi_state->pending_card, user_buf);
+		uint32_t uid = UserIndex_FindUserByCard(multi_state->pending_card, user_buf);
 		if (uid != 0)
 		{
 			uint16_t user_uid = (user_buf[1] << 8) | user_buf[0];
@@ -805,7 +783,7 @@ void WiegandAccess_ProcessKey(uint8_t reader_id, uint8_t key_value)
 		{
 			// 普通卡+密码验证
 			uint8_t user_buf[26];
-			uint32_t uid = FindUserByCard(key_state->card_number, user_buf);
+			uint32_t uid = UserIndex_FindUserByCard(key_state->card_number, user_buf);
 			if (uid != 0)
 			{
 				uint32_t stored_pwd = *(uint32_t*)(user_buf + 6);

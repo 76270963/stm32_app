@@ -16,6 +16,9 @@ typedef enum {
     DOOR_EXIT  = 1
 } DoorDir;
 
+
+
+
 // ==================== 事件代码定义（完整版 1-86） ====================
 
 // 网络与电源事件 (1-8)
@@ -167,7 +170,6 @@ typedef enum {
 
 
 
-void BuildCardIndex(void);
 
 // 初始化韦根刷卡模块（清空所有状态）
 void WiegandAccess_Init(void);

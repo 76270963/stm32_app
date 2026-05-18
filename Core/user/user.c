@@ -7,6 +7,10 @@
 
 
 #include "user.h"
+#include "pcf8563.h"
+#include "w25q128.h"
+#include "net_app.h"
+#include "w5500_hal.h"
 
 SysPara sys_para;
 SysDoor sys_door;
@@ -129,6 +133,7 @@ void SysDoor_init(void)
         }
     }
 }
+
 
 void read_system_parameters(void)
 {

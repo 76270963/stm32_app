@@ -11,6 +11,7 @@ C_SRCS += \
 ../Core/user/timApp.c \
 ../Core/user/usart.c \
 ../Core/user/user.c \
+../Core/user/user_index.c \
 ../Core/user/w25q128.c \
 ../Core/user/wiegand.c 
 
@@ -21,6 +22,7 @@ OBJS += \
 ./Core/user/timApp.o \
 ./Core/user/usart.o \
 ./Core/user/user.o \
+./Core/user/user_index.o \
 ./Core/user/w25q128.o \
 ./Core/user/wiegand.o 
 
@@ -31,6 +33,7 @@ C_DEPS += \
 ./Core/user/timApp.d \
 ./Core/user/usart.d \
 ./Core/user/user.d \
+./Core/user/user_index.d \
 ./Core/user/w25q128.d \
 ./Core/user/wiegand.d 
 
@@ -42,7 +45,7 @@ Core/user/%.o Core/user/%.su Core/user/%.cyclo: ../Core/user/%.c Core/user/subdi
 clean: clean-Core-2f-user
 
 clean-Core-2f-user:
-	-$(RM) ./Core/user/access.cyclo ./Core/user/access.d ./Core/user/access.o ./Core/user/access.su ./Core/user/log.cyclo ./Core/user/log.d ./Core/user/log.o ./Core/user/log.su ./Core/user/pcf8563.cyclo ./Core/user/pcf8563.d ./Core/user/pcf8563.o ./Core/user/pcf8563.su ./Core/user/timApp.cyclo ./Core/user/timApp.d ./Core/user/timApp.o ./Core/user/timApp.su ./Core/user/usart.cyclo ./Core/user/usart.d ./Core/user/usart.o ./Core/user/usart.su ./Core/user/user.cyclo ./Core/user/user.d ./Core/user/user.o ./Core/user/user.su ./Core/user/w25q128.cyclo ./Core/user/w25q128.d ./Core/user/w25q128.o ./Core/user/w25q128.su ./Core/user/wiegand.cyclo ./Core/user/wiegand.d ./Core/user/wiegand.o ./Core/user/wiegand.su
+	-$(RM) ./Core/user/access.cyclo ./Core/user/access.d ./Core/user/access.o ./Core/user/access.su ./Core/user/log.cyclo ./Core/user/log.d ./Core/user/log.o ./Core/user/log.su ./Core/user/pcf8563.cyclo ./Core/user/pcf8563.d ./Core/user/pcf8563.o ./Core/user/pcf8563.su ./Core/user/timApp.cyclo ./Core/user/timApp.d ./Core/user/timApp.o ./Core/user/timApp.su ./Core/user/usart.cyclo ./Core/user/usart.d ./Core/user/usart.o ./Core/user/usart.su ./Core/user/user.cyclo ./Core/user/user.d ./Core/user/user.o ./Core/user/user.su ./Core/user/user_index.cyclo ./Core/user/user_index.d ./Core/user/user_index.o ./Core/user/user_index.su ./Core/user/w25q128.cyclo ./Core/user/w25q128.d ./Core/user/w25q128.o ./Core/user/w25q128.su ./Core/user/wiegand.cyclo ./Core/user/wiegand.d ./Core/user/wiegand.o ./Core/user/wiegand.su
 
 .PHONY: clean-Core-2f-user
 

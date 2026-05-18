@@ -74,6 +74,10 @@ uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
    static uint16_t sock_next_rd[_WIZCHIP_SOCK_NUM_] ={0,};
 #endif
 
+static int8_t connect_IO_6(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
+
 //A20150601 : For integrating with W5300
 #if _WIZCHIP_ == 5300
    uint8_t sock_remained_byte[_WIZCHIP_SOCK_NUM_] = {0,}; // set by wiz_recv_data()
@@ -197,7 +201,6 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 { 
 
    uint8_t taddr[16];
-   uint16_t local_port=0;
    CHECK_SOCKNUM(); 
    switch (protocol & 0x0F)
    {
@@ -490,7 +493,7 @@ int8_t disconnect(uint8_t sn)
       setSn_CR(sn,Sn_CR_DISCON);
       /* wait to process the command... */
       while(getSn_CR(sn));
-	   sock_is_sending &= ~(1<<sn);
+      sock_is_sending &= ~(1<<sn);
       if(sock_io_mode & (1<<sn)) return SOCK_BUSY;
       while(getSn_SR(sn) != SOCK_CLOSED)
       {
@@ -849,16 +852,10 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
       else taddr = 0;
    #endif
 
-#ifdef IPV6_AVAILABLE
-   setSn_CR(sn,tcmd);
-#else
-//A20150601 : For W5300
 #if _WIZCHIP_ == 5300
    setSn_TX_WRSR(sn, len);
 #endif
-//   
-   setSn_CR(sn,Sn_CR_SEND);
-#endif 
+   setSn_CR(sn,tcmd);
    /* wait to process the command... */
    while(getSn_CR(sn));
    while(1)
@@ -897,8 +894,8 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
 int32_t recvfrom_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port){
    //int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port)
    // printf("recvfrom_W5x00\r\n" ) ;
-   uint8_t *dummy ; 
-   return recvfrom_IO_6(sn,   buf,  len,   addr,  port, dummy);
+   uint8_t dummy = 0;
+   return recvfrom_IO_6(sn, buf, len, addr, port, &dummy);
 }
 
 int32_t recvfrom_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen ){

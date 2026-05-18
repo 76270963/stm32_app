@@ -51,6 +51,13 @@
 // 日志元数据存储地址
 #define LOG_META_ADDR           0x800000
 
+// 用户卡号索引元数据地址
+#define USER_INDEX_META_ADDR    0x800100
+// 用户卡号索引起始地址（8字节对齐）
+#define USER_INDEX_ADDR         0x800200
+// 用户卡号索引临时构建区
+#define USER_INDEX_TEMP_ADDR    0x820000
+
 // 剩余空间：0x800000 ~ 0xFFFFFF (8MB)
 
 //******************************************************
